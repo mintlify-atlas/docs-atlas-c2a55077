@@ -1,0 +1,91 @@
+---
+title: "Download reports"
+description: "Export field operation data as downloadable reports"
+---
+
+The **Download Reports** page at `/reportspost` extends the standard reports feature with day-by-day batch processing, a live progress indicator, a cancellation option, and Excel export. It is designed for larger date ranges where a single API call would time out.
+
+## How it works
+
+Instead of sending one request for the full date range, the platform iterates over each day in the selected range and fetches data for that day individually. A progress popup tracks how many days have been processed and how many remain. When all days are complete, the platform assembles the results and exports them to Excel.
+
+## Downloading a report
+
+<Steps>
+  <Step title="Select a client">
+    Choose a **Cliente** from the dropdown. The platform fetches the full client list from `GET /clientes/getClients` on page load. Selecting a client clears the current form selection and loads that client's available forms from `POST /formularios/getFormsWeb`.
+  </Step>
+  <Step title="Select a form">
+    Choose a **Formulario**. Form names are displayed in uppercase. For `TRANSFERENCIAS` forms, an additional **Condición** dropdown appears with two options: **Con Respuestas en blanco** or **Sin Respuestas en blanco**.
+  </Step>
+  <Step title="Select a region">
+    Choose a **Región** from the dropdown, or select **TODAS LAS REGIONES** to include data from all regions. The region list is fetched from `GET /regiones/getRegion` on page load.
+  </Step>
+  <Step title="Set the data scope">
+    In the **Opciones** dropdown, choose:
+    - **Toda la información** — returns all records in the date range
+    - **Última sincronización** — for each establishment, returns only the records from the most recent sync date within the range
+  </Step>
+  <Step title="Set the date range">
+    Enter a **Desde** (start) and **Hasta** (end) date. The platform defaults to the last 7 days. Each day in the range is fetched as a separate request to `POST /analytics/generateReportAnalytics/generateReport`.
+  </Step>
+  <Step title="Generate and download">
+    Click **Generar reporte**. A progress popup appears showing days processed, days remaining, and a percentage progress bar. When processing is complete, the Excel file downloads automatically.
+
+    To stop processing before it completes, click **Cancelar** in the progress popup.
+  </Step>
+</Steps>
+
+<Note>
+The progress popup shows two counters: **days processed** (out of the total range) and **days remaining**. Processing happens sequentially — one API request per day.
+</Note>
+
+## Export formats
+
+### Excel (.xlsx)
+
+All reports export to Excel using the `js-export-excel` library. Each export creates a single sheet named after the selected form.
+
+The columns included depend on the form type:
+
+<CardGroup cols={2}>
+  <Card title="Standard forms" icon="table">
+    `formulario`, `fecha_Formulario`, `fecha_Sincronizado`, `region`, `usuario`, `razon_social`, `canal`, `ciudad`, `cod_est`, `establecimiento`, `categoria`, `subcategoria`, `marcaProducto`, `codigo`, `producto`, `pregunta`, `respuesta`, `moneda`, `tasa`
+  </Card>
+  <Card title="Synchronization form" icon="rotate">
+    `formulario`, `fecha_Formulario`, `fecha_Sincronizado`, `region`, `usuario`, `razon_social`, `canal`, `ciudad`, `cod_est`, `establecimiento`
+  </Card>
+  <Card title="Levantamiento Kioto" icon="clipboard">
+    `formulario`, `fecha_Formulario`, `hora_Formulario`, `fecha_Creado`, `hora_Creado`, `region`, `usuario`, `pregunta`, `respuesta`
+  </Card>
+  <Card title="FORMULARIO TODOTICKET / TRANSFERENCIAS" icon="file-invoice">
+    Fixed header columns followed by dynamically ordered question columns. Numeric question columns (e.g., `1. Answer`, `2A. Other`) are sorted numerically then alphabetically by suffix.
+  </Card>
+</CardGroup>
+
+### PDF and PowerPoint
+
+The platform includes `jspdf` and `pptxgenjs` as dependencies for PDF and PowerPoint generation respectively. These formats are available for other report contexts in the platform (such as analytics dashboards). The Download Reports page uses Excel as its primary export target.
+
+## Fundamental form behavior
+
+When you select a Fundamental-type form, the platform exports two Excel files:
+
+- **Fundamental** — all responses where `pregunta` is not a price field
+- **Precios** — price responses with normalized `moneda` values (`BS` for Bolivares, `$` for Dollars)
+
+Both files download sequentially.
+
+## NESTLE VENEZUELA — GIRA Y GANA
+
+<Tip>
+For the **GIRA Y GANA** form under **NESTLE VENEZUELA**, the platform pivots the data by establishment visit. Each unique combination of establishment, promoter, date, and product becomes one row, with each `pregunta` value becoming its own column.
+</Tip>
+
+## Cancelling a running report
+
+Click **Cancelar** in the progress popup to stop processing. Any data already fetched is discarded and no file is downloaded. The button shows **Cancelando...** while the current day's request finishes.
+
+<Warning>
+Cancellation takes effect after the in-flight request for the current day completes. It does not abort the HTTP request itself — it prevents the next iteration from starting.
+</Warning>

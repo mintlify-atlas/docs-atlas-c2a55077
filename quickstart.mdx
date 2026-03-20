@@ -1,80 +1,132 @@
 ---
 title: "Quickstart"
-description: "Start building awesome documentation in minutes"
+description: "Get Mobility 4 running and complete your first field operation."
 ---
 
-## Get started in three steps
+## Prerequisites
 
-Get your documentation site running locally and make your first customization.
+Before you begin, make sure you have the following:
 
-### Step 1: Set up your local environment
+- Node.js 18 or later
+- npm 9 or later
+- A Firebase project with Authentication and Firestore enabled
+- A valid Mobility 4 API bearer token
 
-<AccordionGroup>
-  <Accordion icon="copy" title="Clone your docs locally">
-    During the onboarding process, you created a GitHub repository with your docs content if you didn't already have one. You can find a link to this repository in your [dashboard](https://dashboard.mintlify.com).
-    
-    To clone the repository locally so that you can make and preview changes to your docs, follow the [Cloning a repository](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository) guide in the GitHub docs.
-  </Accordion>
-  <Accordion icon="rectangle-terminal" title="Start the preview server">
-    1. Install the Mintlify CLI: `npm i -g mint`
-    2. Navigate to your docs directory and run: `mint dev`
-    3. Open `http://localhost:3000` to see your docs live!
-    
-    <Tip>Your preview updates automatically as you edit files.</Tip>
-  </Accordion>
-</AccordionGroup>
+## Set up the application
 
-### Step 2: Deploy your changes
+<Steps>
+  <Step title="Clone the repository">
+    Clone the Mobility 4 source repository to your local machine.
 
-<AccordionGroup>
-  <Accordion icon="github" title="Install our GitHub app">
-    Install the Mintlify GitHub app from your [dashboard](https://dashboard.mintlify.com/settings/organization/github-app).
-    
-    Our GitHub app automatically deploys your changes to your docs site, so you don't need to manage deployments yourself.
-</Accordion>
-<Accordion icon="palette" title="Update your site name and colors">
-    For a first change, let's update the name and colors of your docs site.
+    ```bash
+    git clone https://github.com/your-org/mobility4.git
+    cd mobility4
+    ```
+  </Step>
 
-    1. Open `docs.json` in your editor.
-    2. Change the `"name"` field to your project name.
-    3. Update the `"colors"` to match your brand.
-    4. Save and see your changes instantly at `http://localhost:3000`.
+  <Step title="Install dependencies">
+    Install all required npm packages.
 
-    <Tip>Try changing the primary color to see an immediate difference!</Tip>
-  </Accordion>
-</AccordionGroup>
+    ```bash
+    npm install
+    ```
+  </Step>
 
-### Step 3: Go live
+  <Step title="Configure environment variables">
+    Copy the example environment file and fill in your values.
 
-<Accordion icon="rocket" title="Publish your docs">
-  1. Commit and push your changes.
-  2. Your docs will update and be live in moments!
-</Accordion>
+    ```bash
+    cp .env.example .env
+    ```
+
+    Open `.env` and set the following variables:
+
+    ```ini .env
+    VITE_API_URL=https://mobility-app.com/api/
+    VITE_ACTIVE_TOKEN=
+    VITE_GOOGLE_MAPS_API_KEY=
+    VITE_FIREBASE_API_KEY=
+    VITE_FIREBASE_AUTH_DOMAIN=
+    VITE_FIREBASE_PROJECT_ID=
+    VITE_FIREBASE_STORAGE_BUCKET=
+    VITE_FIREBASE_MESSAGING_SENDER_ID=
+    VITE_FIREBASE_APP_ID=
+    VITE_FIREBASE_MEASUREMENT_ID=
+    ```
+
+    <Note>
+      `VITE_API_URL` defaults to `https://mobility-app.com/api/` if left blank. Set `VITE_ACTIVE_TOKEN` to the Bearer token used to authorize all REST API calls. See [Authentication](/authentication) for details on obtaining this token.
+    </Note>
+  </Step>
+
+  <Step title="Start the development server">
+    Run the Vite development server.
+
+    ```bash
+    npm run dev
+    ```
+
+    The application opens at `http://localhost:5173` by default.
+
+    <Tip>
+      Vite hot-reloads on every file save, so you can keep the server running while you explore the codebase.
+    </Tip>
+  </Step>
+</Steps>
+
+## Complete your first field operation
+
+Once the application is running, follow these steps to go from sign-in to tracking your first field activity.
+
+<Steps>
+  <Step title="Sign in">
+    Navigate to `http://localhost:5173/auth/sign-in`. Enter your **Email or ID number (cédula)** and **Password**, then click **Iniciar Sesión**.
+
+    You can sign in with either your registered email address or your numeric ID number (7–8 digits). After a successful login, you are redirected to the **Dashboard**.
+
+    <Tip>
+      If you have forgotten your password, click **¿Olvidaste tu contraseña?** on the sign-in screen to go to `/auth/password-reset`.
+    </Tip>
+  </Step>
+
+  <Step title="Navigate to the dashboard">
+    After sign-in, you land on the **Ecommerce** dashboard at `/dashboard/ecommerce`. This page gives you an overview of field activity metrics across your assigned clients and regions.
+  </Step>
+
+  <Step title="Create a user">
+    Go to **Users** (`/User`) using the sidebar navigation. Click **Create User** and fill in the required fields: name, email, ID number, and password. Complete the configuration, security, regions, and modules steps in the creation wizard.
+
+    <Note>
+      User creation is multi-step. Each step validates its fields before allowing you to proceed. Make sure you assign at least one client and one region in the **Clientes** and **Regiones** steps.
+    </Note>
+  </Step>
+
+  <Step title="Assign the user to a region">
+    Once the user is created, navigate to **User Assignment** (`/AsignacionUsuarios`). Select the target region and assign the newly created user. This step links the user to a route and region so they appear in field tracking filters.
+  </Step>
+
+  <Step title="Track field activity">
+    Navigate to **Seguimiento** (`/seguimiento`) in the sidebar. Select a **Client** and a **Region** from the filter dropdowns — these options are populated from your own `userData` in localStorage. Then select a **User** (or choose **Todos los usuarios** to see all) and a date, and click **Buscar** to load GPS coordinates on the interactive map.
+
+    <Tip>
+      The map updates in real time based on the selected filters. Use the date picker to review historical field activity for any given day.
+    </Tip>
+  </Step>
+</Steps>
 
 ## Next steps
 
-Now that you have your docs running, explore these key features:
-
 <CardGroup cols={2}>
-
-<Card title="Write Content" icon="pen-to-square" href="/essentials/markdown">
-  Learn MDX syntax and start writing your documentation.
-</Card>
-
-<Card title="Customize style" icon="palette" href="/essentials/settings">
-  Make your docs match your brand perfectly.
-</Card>
-
-<Card title="Add code examples" icon="square-code" href="/essentials/code">
-  Include syntax-highlighted code blocks.
-</Card>
-
-<Card title="API documentation" icon="code" href="/api-reference/introduction">
-  Auto-generate API docs from OpenAPI specs.
-</Card>
-
+  <Card title="Authentication" icon="key" href="/authentication">
+    Learn how Firebase and Bearer tokens work together in Mobility 4.
+  </Card>
+  <Card title="Architecture" icon="sitemap" href="/concepts/architecture">
+    Understand the technical structure of the platform.
+  </Card>
+  <Card title="Roles & permissions" icon="shield-halved" href="/concepts/roles-permissions">
+    Configure role-based access for your users.
+  </Card>
+  <Card title="Regions & clients" icon="earth-americas" href="/concepts/regions-clients">
+    Understand the client-region-establishment hierarchy.
+  </Card>
 </CardGroup>
-
-<Note>
-  **Need help?** See our [full documentation](https://mintlify.com/docs) or join our [community](https://mintlify.com/community).
-</Note>

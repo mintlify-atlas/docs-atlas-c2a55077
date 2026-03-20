@@ -1,0 +1,71 @@
+---
+title: "Surveys"
+description: "Create and distribute surveys to field teams"
+---
+
+The **Surveys** module lets you generate and export survey results collected by field promoters. Surveys differ from regular forms in that they are linked to orders (`ordenes`) rather than standalone form submissions. Survey responses capture structured question-and-answer data that can be exported to Excel for analysis.
+
+## Route
+
+| Route | Purpose |
+|---|---|
+| `/encuestas` | Generate and export survey data |
+
+## How surveys differ from forms
+
+Regular forms (see [Forms](/features/forms)) are filled out in the field during a visit and stored as standalone submissions tied to an establishment. Surveys are linked to `ordenes` (orders) — they are generated server-side by querying order records that contain embedded survey question responses. You do not fill surveys in the web interface; you generate an export from existing field data.
+
+## Generating a survey export
+
+<Steps>
+  <Step title="Navigate to the surveys page">
+    Go to `/encuestas`. The page loads the clients and regions assigned to your user account from `localStorage`.
+  </Step>
+  <Step title="Select the company type">
+    Choose either **OPERACIONES** or **SURVEY** from the **Empresa** selector. The export format differs between the two:
+    - **OPERACIONES**: Question answers are exported as plain text ("Si" / "No" for yes/no questions).
+    - **SURVEY**: Answers are exported as numeric codes matching the position of the selected option in the question's option list. An additional **OTRO** column is included for open-text responses.
+  </Step>
+  <Step title="Choose client and region">
+    Select a **Cliente** and a **Región** from the dropdowns. Both fields are required. Leave **Región** set to `TODAS LAS REGIONES` to include all regions.
+  </Step>
+  <Step title="Set the date range">
+    Set the **Desde** and **Hasta** date fields. Both fields are required. The default range is the last 7 days.
+  </Step>
+  <Step title="(Optional) Filter by first question">
+    If the **Empresa** is set to **SURVEY**, a checkbox appears: **Solo encuestas con primera pregunta en "Si"**. Enable this to include only survey responses where the first question answer is affirmative.
+  </Step>
+  <Step title="Generate the export">
+    Click **Generar encuesta**. The system calls `POST /ordenes/generateEncuesta` with your parameters. If successful, an Excel file is downloaded to your browser named `Encuestas.xlsx`.
+
+    <Note>
+      The API call includes an automatic retry mechanism. If the request fails due to a network error or a `504 Gateway Timeout`, the system retries up to 3 times with a 2-second delay between attempts.
+    </Note>
+  </Step>
+</Steps>
+
+## API reference
+
+The survey export is powered by a single endpoint:
+
+```json POST /ordenes/generateEncuesta
+{
+  "region": "CARACAS",
+  "fechaInicio": "2024-01-01",
+  "fechaFinal": "2024-01-07",
+  "nombre_Cliente": "ACME CORP"
+}
+```
+
+| Field | Type | Required | Description |
+|---|---|---|---|
+| `region` | `string` | No | Region to filter by. Omit to include all regions. |
+| `fechaInicio` | `string` | Yes | Start date in `YYYY-MM-DD` format. |
+| `fechaFinal` | `string` | Yes | End date in `YYYY-MM-DD` format. |
+| `nombre_Cliente` | `string` | Yes | Exact client name as stored in the system. |
+
+The response is an array of order records, each containing a `preguntas` array with the question text, type, options, and recorded answer.
+
+<Warning>
+  If no records are found for the given date range, the export is not triggered and you will see a warning notification. Broaden your date range or verify that promoters have synced their data.
+</Warning>

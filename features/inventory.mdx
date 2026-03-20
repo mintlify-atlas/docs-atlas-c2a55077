@@ -1,0 +1,102 @@
+---
+title: "Inventory"
+description: "Track product inventory, manage transfers, and review movement history"
+---
+
+The **Inventory** module (`Inventario Totals`) gives you a real-time view of stock levels across all regions and companies. You can see how much of each article is available per promoter region, transfer stock between regions, and review the full movement history.
+
+## Route
+
+| Route | Purpose |
+|---|---|
+| `/totalinventario` | View current inventory and initiate transfers |
+
+## Inventory per promoter concept
+
+In Mobility 4, inventory is tracked at the region level, not per individual promoter. Each inventory record belongs to a **empresa** (company), **region**, **tipo_articulo** (article type), and **articulo** (specific article). The `detalle_orden` field on each record holds an array of order detail objects, each with a `cantidad` (quantity). The total quantity for a record is the sum of all `cantidad` values in `detalle_orden`.
+
+When you transfer stock, you move a quantity of a specific article from one region (the source) to another region (the destination).
+
+## Viewing current inventory
+
+Navigate to `/totalinventario`. The page automatically loads all inventory records via `GET /inventario/getInventario` when it mounts.
+
+The data grid displays the following columns:
+
+| Column | Description |
+|---|---|
+| **Empresa** | The company that owns the stock |
+| **Region** | The region where the stock is held |
+| **Tipo Articulo** | The article category |
+| **Articulo** | The specific article name |
+| **Cantidad** | Total units available (sum of all `detalle_orden` quantities) |
+
+You can filter any column using the built-in header filters, resize and reorder columns, and select multiple rows.
+
+## Transferring inventory
+
+Click **Transferencia** to open the transfer modal.
+
+<Steps>
+  <Step title="Select the company">
+    Choose the **Empresa** from the dropdown. The options are derived from the distinct company names present in the current inventory.
+  </Step>
+  <Step title="Select the source region">
+    Choose the **Región** (source region) from the dropdown. Once you select both a company and a region, the **Cantidad** field is automatically populated with the total available units matching your selection.
+  </Step>
+  <Step title="Select the destination region">
+    Choose the **Región a Transferir** (destination region). This list is loaded from `GET /inventario/getUsuariosPromotores`.
+  </Step>
+  <Step title="Select article type and article">
+    Choose a **Tipo de artículo** and then an **Artículos** value. Selecting either of these also recalculates the available **Cantidad**.
+  </Step>
+  <Step title="Enter the transfer quantity">
+    Enter the number of units to move in **Cantidad a Transferir**. The **Restante** field updates automatically to show the balance that will remain in the source region after the transfer.
+  </Step>
+  <Step title="Assign a responsible person">
+    Choose a **Responsable** from the dropdown. The list is filtered to show only Supervisors and Coordinators assigned to the source region. Selecting a responsible person auto-fills the **Cédula Responsable** field.
+  </Step>
+  <Step title="Submit the transfer">
+    Click **Realizar Transferencia**. The system calls `POST /inventario/transferInventario` and, on success, reloads the inventory table.
+  </Step>
+</Steps>
+
+### Transfer request body
+
+```json POST /inventario/transferInventario
+{
+  "empresa": "CONSORCIO PROMOTING C.A.",
+  "region": "CARACAS",
+  "regionTrans": "MARACAIBO",
+  "responsable": "Juan Pérez",
+  "tipo_articulo": "uniformes",
+  "articulo": "camisa dama m",
+  "detalle_orden": [{ "cantidad": 10 }],
+  "cedula_responsable": "V-12345678"
+}
+```
+
+| Field | Type | Description |
+|---|---|---|
+| `empresa` | `string` | Company name |
+| `region` | `string` | Source region |
+| `regionTrans` | `string` | Destination region |
+| `responsable` | `string` | Full name of the responsible person |
+| `tipo_articulo` | `string` | Article type |
+| `articulo` | `string` | Article name |
+| `detalle_orden` | `array` | Array with a single object containing `cantidad` (quantity to transfer) |
+| `cedula_responsable` | `string` | ID number of the responsible person |
+
+## Movement history
+
+The movement history (including both entries and dotacion allocations) is available from `GET /inventario/getMovInventario`. This endpoint is used by the [Dotacion](/features/dotacion) module to display the full log of inventory movements.
+
+## API reference
+
+| Method | Endpoint | Description |
+|---|---|---|
+| `GET` | `/inventario/getInventario` | Fetch current inventory |
+| `POST` | `/inventario/transferInventario` | Transfer stock between regions |
+| `POST` | `/inventario/saveInventario` | Record a new inventory movement (entry or dotacion) |
+| `GET` | `/inventario/getMovInventario` | Fetch inventory movement history |
+| `GET` | `/inventario/getUsuariosPromotores` | Fetch promoters for transfer region selection |

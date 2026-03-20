@@ -1,0 +1,150 @@
+---
+title: "Clients"
+description: "Manage client records: list all clients, create or update a client, and soft-delete a client by ID."
+---
+
+The clients API lets you manage the client organizations that field operations are performed for. All endpoints are under the `clientes/` namespace.
+
+<Note>
+  All requests require a valid Bearer token. See [Authentication](/api/authentication) for setup instructions.
+</Note>
+
+---
+
+## getClients
+
+Fetch all clients.
+
+**Method:** `GET`  
+**Path:** `/clientes/getClients`
+
+### Request
+
+No parameters required.
+
+### Response
+
+Returns the full Axios `response` object. Access the client list via `response.data`.
+
+### Example
+
+<CodeGroup>
+
+```javascript getClients
+import { getClients } from "@/Api/clients";
+
+const response = await getClients();
+console.log(response.data);
+```
+
+```javascript axios equivalent
+import Axios from "axios";
+import settings from "@/Api/enviroment";
+
+const headers = {
+  Authorization: `Bearer ${settings.ACTIVE_TOKEN}`,
+  "Content-Type": "application/json",
+};
+
+const response = await Axios.get(
+  settings.API_URL + "clientes/getClients",
+  { headers }
+);
+```
+
+</CodeGroup>
+
+---
+
+## createUpdateClient
+
+Create a new client or update an existing one. The server determines whether to insert or update based on the contents of `data` (typically the presence of an `id` field).
+
+**Method:** `POST`  
+**Path:** `/clientes/createUpdateClient`
+
+### Request
+
+<ParamField body="data" type="object" required>
+  A client object. Include an `id` field to update an existing client; omit it to create a new one.
+</ParamField>
+
+### Response
+
+Returns the full Axios `response` object.
+
+### Example
+
+<CodeGroup>
+
+```javascript create a client
+import { createUpdateClient } from "@/Api/clients";
+
+const response = await createUpdateClient({
+  name: "Acme Corp",
+  contactEmail: "ops@acme.com",
+});
+```
+
+```javascript update a client
+import { createUpdateClient } from "@/Api/clients";
+
+const response = await createUpdateClient({
+  id: "client-xyz",
+  name: "Acme Corp (Updated)",
+  contactEmail: "newops@acme.com",
+});
+```
+
+</CodeGroup>
+
+---
+
+## deleteClient
+
+Soft-delete a client by ID.
+
+**Method:** `PUT`  
+**Path:** `/clientes/deleteClient`
+
+<Note>
+  This endpoint uses `PUT`, not `DELETE`. The client is soft-deleted rather than permanently removed.
+</Note>
+
+### Request
+
+<ParamField body="id" type="string" required>
+  The unique identifier of the client to delete.
+</ParamField>
+
+### Response
+
+Returns the full Axios `response` object.
+
+### Example
+
+<CodeGroup>
+
+```javascript deleteClient
+import { deleteClient } from "@/Api/clients";
+
+const response = await deleteClient("client-xyz");
+```
+
+```javascript axios equivalent
+import Axios from "axios";
+import settings from "@/Api/enviroment";
+
+const headers = {
+  Authorization: `Bearer ${settings.ACTIVE_TOKEN}`,
+  "Content-Type": "application/json",
+};
+
+const response = await Axios.put(
+  settings.API_URL + "clientes/deleteClient",
+  { id: "client-xyz" },
+  { headers }
+);
+```
+
+</CodeGroup>

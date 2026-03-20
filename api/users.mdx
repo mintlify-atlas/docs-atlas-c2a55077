@@ -1,0 +1,284 @@
+---
+title: "Users"
+description: "Look up users, fetch establishment assignments, and manage assignment operations for field operators."
+---
+
+The users API covers client lookups, region lookups, and all establishment-assignment operations for individual users. Functions in `user.js` target the `clientes/`, `regiones/`, `usuarios/`, and `analytics/` namespaces.
+
+<Note>
+  All requests require a valid Bearer token. See [Authentication](/api/authentication) for setup instructions.
+</Note>
+
+---
+
+## getClients
+
+Fetch all clients.
+
+**Method:** `GET`  
+**Path:** `/clientes/getClients`
+
+### Request
+
+No parameters required.
+
+### Response
+
+Returns the full Axios `response` object. Access client records via `response.data`.
+
+### Example
+
+<CodeGroup>
+
+```javascript getClients
+import { getClients } from "@/Api/user";
+
+const response = await getClients();
+console.log(response.data);
+```
+
+</CodeGroup>
+
+---
+
+## getRegion
+
+Fetch all regions.
+
+**Method:** `GET`  
+**Path:** `/regiones/getRegion`
+
+### Request
+
+No parameters required.
+
+### Response
+
+Returns `response.data` — an array of region objects.
+
+### Example
+
+<CodeGroup>
+
+```javascript getRegion
+import { getRegion } from "@/Api/user";
+
+const regions = await getRegion();
+console.log(regions);
+```
+
+</CodeGroup>
+
+---
+
+## getEstablecimientoNewCollection
+
+Fetch the establishment list from the new Firestore sub-collection for a given user.
+
+**Method:** `POST`  
+**Path:** `/usuarios/getEstablecimientoNewCollection`
+
+### Request
+
+<ParamField body="uid" type="string" required>
+  The Firebase UID of the user whose establishment sub-collection should be retrieved.
+</ParamField>
+
+### Response
+
+Returns the full Axios `response` object. Access records via `response.data`.
+
+### Example
+
+<CodeGroup>
+
+```javascript getEstablecimientoNewCollection
+import { getEstablecimientoNewCollection } from "@/Api/user";
+
+const response = await getEstablecimientoNewCollection("user-uid-123");
+console.log(response.data);
+```
+
+</CodeGroup>
+
+---
+
+## getStoreNewFormat
+
+Fetch the list of assigned establishments from the new Firestore sub-collection format. Each item includes an `id` field (the Firestore document ID) that you can use with `DeleteAsignacionEstablecimientos`.
+
+**Method:** `POST`  
+**Path:** `/usuarios/getStoreNewFormat`
+
+### Request
+
+<ParamField body="uid" type="string" required>
+  The Firebase UID of the user.
+</ParamField>
+
+### Response
+
+Returns the full Axios `response` object. Each record in `response.data` includes an `id` property representing the Firestore document ID.
+
+### Example
+
+<CodeGroup>
+
+```javascript getStoreNewFormat
+import { getStoreNewFormat } from "@/Api/user";
+
+const response = await getStoreNewFormat("user-uid-123");
+console.log(response.data);
+```
+
+</CodeGroup>
+
+---
+
+## DeleteAsignacionEstablecimientos
+
+Delete a single assigned establishment from the user's Firestore sub-collection by document ID.
+
+**Method:** `POST`  
+**Path:** `/usuarios/DeleteAsignacionEstablecimientos`
+
+### Request
+
+<ParamField body="uid" type="string" required>
+  The Firebase UID of the user.
+</ParamField>
+
+<ParamField body="idEstablecimiento" type="string" required>
+  The Firestore document ID of the establishment assignment to remove. Obtain this from the `id` field returned by `getStoreNewFormat`.
+</ParamField>
+
+### Response
+
+Returns the full Axios `response` object.
+
+### Example
+
+<CodeGroup>
+
+```javascript DeleteAsignacionEstablecimientos
+import { DeleteAsignacionEstablecimientos } from "@/Api/user";
+
+const response = await DeleteAsignacionEstablecimientos(
+  "user-uid-123",
+  "doc-id-abc"
+);
+```
+
+</CodeGroup>
+
+---
+
+## getStoresByRegion
+
+Fetch all establishments available within a given region using the `sp_get_storeWithRegion` stored procedure.
+
+**Method:** `POST`  
+**Path:** `/analytics/callProcedure`
+
+### Request
+
+<ParamField body="method" type="string">
+  Always `"sp_get_storeWithRegion"`. Set internally by the function.
+</ParamField>
+
+<ParamField body="params.nameRegion" type="string" required>
+  The name of the region to filter establishments by.
+</ParamField>
+
+### Response
+
+Returns the full Axios `response` object. Access establishment records via `response.data`.
+
+### Example
+
+<CodeGroup>
+
+```javascript getStoresByRegion
+import { getStoresByRegion } from "@/Api/user";
+
+const response = await getStoresByRegion("North Zone");
+console.log(response.data);
+```
+
+</CodeGroup>
+
+---
+
+## AsignarNewCollectionEstablecimientos
+
+Assign one or more establishments to a user's Firestore sub-collection.
+
+**Method:** `POST`  
+**Path:** `/usuarios/AsignarNewCollectionEstablecimientos`
+
+### Request
+
+<ParamField body="uid" type="string" required>
+  The Firebase UID of the user.
+</ParamField>
+
+<ParamField body="establecimientos" type="array" required>
+  An array of establishment objects to assign to the user.
+</ParamField>
+
+### Response
+
+Returns the full Axios `response` object.
+
+### Example
+
+<CodeGroup>
+
+```javascript AsignarNewCollectionEstablecimientos
+import { AsignarNewCollectionEstablecimientos } from "@/Api/user";
+
+const response = await AsignarNewCollectionEstablecimientos(
+  "user-uid-123",
+  [{ id: "store-1" }, { id: "store-2" }]
+);
+```
+
+</CodeGroup>
+
+---
+
+## DeleteMultipleAsignacionEstablecimientos
+
+Delete multiple assigned establishments from a user's Firestore sub-collection in a single request.
+
+**Method:** `POST`  
+**Path:** `/usuarios/DeleteMultipleAsignacionEstablecimientos`
+
+### Request
+
+<ParamField body="uid" type="string" required>
+  The Firebase UID of the user.
+</ParamField>
+
+<ParamField body="idEstablecimientos" type="array" required>
+  An array of Firestore document IDs to remove from the user's assignment sub-collection.
+</ParamField>
+
+### Response
+
+Returns the full Axios `response` object.
+
+### Example
+
+<CodeGroup>
+
+```javascript DeleteMultipleAsignacionEstablecimientos
+import { DeleteMultipleAsignacionEstablecimientos } from "@/Api/user";
+
+const response = await DeleteMultipleAsignacionEstablecimientos(
+  "user-uid-123",
+  ["doc-id-1", "doc-id-2", "doc-id-3"]
+);
+```
+
+</CodeGroup>

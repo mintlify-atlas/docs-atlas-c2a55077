@@ -1,0 +1,101 @@
+---
+title: "API overview"
+description: "Overview of the Mobility 4 REST API, including base URL, authentication, and available resource namespaces."
+---
+
+The Mobility 4 API is a REST API that gives you programmatic access to field operations data: clients, users, roles, regions, establishments, routes, inventory, orders, forms, and real-time tracking. All requests and responses use JSON.
+
+## Base URL
+
+All API paths are relative to:
+
+```
+https://mobility-app.com/api/
+```
+
+You can override the base URL at build time using the `VITE_API_URL` environment variable.
+
+## Authentication
+
+Every request must include a Bearer token in the `Authorization` header:
+
+```
+Authorization: Bearer <token>
+```
+
+The token is read from the `VITE_ACTIVE_TOKEN` environment variable. See [Authentication](/api/authentication) for details.
+
+## Content type
+
+All requests must send and accept JSON:
+
+```
+Content-Type: application/json
+```
+
+## Environment variables
+
+Configure the API URL and token in your `.env` file:
+
+```bash .env
+VITE_API_URL=https://mobility-app.com/api/
+VITE_ACTIVE_TOKEN=your_bearer_token_here
+```
+
+These values are consumed by `src/Api/enviroment.js`:
+
+```javascript src/Api/enviroment.js
+const settings = {
+  API_URL: import.meta.env.VITE_API_URL || "https://mobility-app.com/api/",
+  ACTIVE_TOKEN: import.meta.env.VITE_ACTIVE_TOKEN || "",
+};
+
+export default settings;
+```
+
+## Request and response format
+
+Request bodies are JSON objects sent in the request body for `POST` and `PUT` methods. Responses are JSON objects or arrays returned directly from `response.data`.
+
+## Resource namespaces
+
+Each resource group maps to a URL prefix and a dedicated documentation page.
+
+<CardGroup cols={2}>
+  <Card title="Dashboard" icon="chart-bar" href="/api/dashboard">
+    Indicators and metrics summaries for the operations dashboard.
+  </Card>
+  <Card title="Users" icon="user" href="/api/users">
+    User lookups, establishment assignments, and bulk operations.
+  </Card>
+  <Card title="Roles" icon="shield" href="/api/roles">
+    Role management: list, create, update, and soft-delete access roles.
+  </Card>
+  <Card title="Clients" icon="building" href="/api/clients">
+    Client records: list, create, update, and soft-delete clients.
+  </Card>
+  <Card title="Regions" icon="map" href="/api/regions">
+    Region management: list, create, update, and soft-delete regions.
+  </Card>
+  <Card title="Establishments" icon="store" href="/api/establishments">
+    Establishment catalog: list, create, retrieve, and update store records.
+  </Card>
+  <Card title="Routes" icon="route" href="/api/routes">
+    Route planning: fetch all establishments and assigned users for a route.
+  </Card>
+  <Card title="Inventory" icon="box" href="/api/inventory">
+    Inventory records, movements, transfers, and saves.
+  </Card>
+  <Card title="Orders" icon="clipboard-list" href="/api/orders">
+    Order and survey generation for field operations.
+  </Card>
+  <Card title="Forms" icon="file-text" href="/api/forms">
+    Form lifecycle: create, update, retrieve, and delete field forms.
+  </Card>
+  <Card title="Tracking" icon="map-pin" href="/api/tracking">
+    Real-time GPS coordinate tracking by user, client, region, and date.
+  </Card>
+  <Card title="Authentication" icon="lock" href="/api/authentication">
+    How to obtain and pass Bearer tokens with every request.
+  </Card>
+</CardGroup>

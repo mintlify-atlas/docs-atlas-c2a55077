@@ -1,0 +1,286 @@
+---
+title: "Forms"
+description: "Manage field forms: fetch, create, update, search, and delete form records used by field operators."
+---
+
+The forms API covers the complete lifecycle of field forms used to capture operational data at establishments. All endpoints are under the `formularios/` namespace.
+
+<Note>
+  All requests require a valid Bearer token. See [Authentication](/api/authentication) for setup instructions.
+</Note>
+
+---
+
+## getForms
+
+Fetch all forms for a specific client.
+
+**Method:** `POST`  
+**Path:** `/formularios/getFormsWeb`
+
+### Request
+
+<ParamField body="cliente" type="string" required>
+  The client identifier used to filter forms.
+</ParamField>
+
+### Response
+
+Returns the full Axios `response` object. Access the form list via `response.data`.
+
+### Example
+
+<CodeGroup>
+
+```javascript getForms
+import { getForms } from "@/Api/Forms";
+
+const response = await getForms("client-xyz");
+console.log(response.data);
+```
+
+</CodeGroup>
+
+---
+
+## addFrom
+
+Create a new form.
+
+**Method:** `POST`  
+**Path:** `/formularios/addForms`
+
+### Request
+
+<ParamField body="formulario" type="object" required>
+  The form object to create. The exact schema depends on your form model.
+</ParamField>
+
+### Response
+
+Returns the full Axios `response` object.
+
+### Example
+
+<CodeGroup>
+
+```javascript addFrom
+import { addFrom } from "@/Api/Forms";
+
+const response = await addFrom({
+  name: "Stock Count Form",
+  client: "client-xyz",
+  fields: [...],
+});
+```
+
+</CodeGroup>
+
+---
+
+## updateDataForm
+
+Update the data fields of an existing form.
+
+**Method:** `POST`  
+**Path:** `/formularios/updateDataForm`
+
+### Request
+
+<ParamField body="formulario" type="object" required>
+  The updated form object. Include the form's identifier so the server can locate the record to update.
+</ParamField>
+
+### Response
+
+Returns the full Axios `response` object.
+
+### Example
+
+<CodeGroup>
+
+```javascript updateDataForm
+import { updateDataForm } from "@/Api/Forms";
+
+const response = await updateDataForm({
+  id: "form-001",
+  name: "Stock Count Form v2",
+  fields: [...],
+});
+```
+
+</CodeGroup>
+
+---
+
+## updateEstablishmentForm
+
+Update only the establishment-related data on a form (such as the assigned store) without modifying timestamp fields on the backend.
+
+**Method:** `POST`  
+**Path:** `/formularios/updateEstablishmentForm`
+
+### Request
+
+<ParamField body="formulario" type="object" required>
+  A partial form object containing only the establishment fields to update. Timestamp fields are preserved by the backend.
+</ParamField>
+
+### Response
+
+Returns the full Axios `response` object.
+
+### Example
+
+<CodeGroup>
+
+```javascript updateEstablishmentForm
+import { updateEstablishmentForm } from "@/Api/Forms";
+
+const response = await updateEstablishmentForm({
+  id: "form-001",
+  establishment: "store-002",
+});
+```
+
+</CodeGroup>
+
+---
+
+## updateForm
+
+Update the photos associated with a form.
+
+**Method:** `POST`  
+**Path:** `/formularios/updateForm`
+
+### Request
+
+<ParamField body="id" type="string" required>
+  The unique identifier of the form to update.
+</ParamField>
+
+<ParamField body="fotos" type="array" required>
+  An array of photo objects or URLs to associate with the form.
+</ParamField>
+
+### Response
+
+Returns the full Axios `response` object.
+
+### Example
+
+<CodeGroup>
+
+```javascript updateForm
+import { updateForm } from "@/Api/Forms";
+
+const response = await updateForm("form-001", [
+  "https://cdn.example.com/photo1.jpg",
+  "https://cdn.example.com/photo2.jpg",
+]);
+```
+
+</CodeGroup>
+
+---
+
+## getSavedForms
+
+Fetch previously saved (completed) forms matching a query object.
+
+**Method:** `POST`  
+**Path:** `/formularios/getSavedForms`
+
+### Request
+
+<ParamField body="obj" type="object" required>
+  A query object specifying filter criteria (e.g., client, region, date range, user).
+</ParamField>
+
+### Response
+
+Returns the full Axios `response` object. Access the saved form list via `response.data`.
+
+### Example
+
+<CodeGroup>
+
+```javascript getSavedForms
+import { getSavedForms } from "@/Api/Forms";
+
+const response = await getSavedForms({
+  client: "client-xyz",
+  region: "North Zone",
+  startDate: "2026-03-01",
+  endDate: "2026-03-20",
+});
+console.log(response.data);
+```
+
+</CodeGroup>
+
+---
+
+## foundForms
+
+Search for forms and update matching records in a single operation.
+
+**Method:** `POST`  
+**Path:** `/formularios/foundAndUpdateForms`
+
+### Request
+
+<ParamField body="obj" type="object" required>
+  A query/update object specifying the forms to find and the changes to apply.
+</ParamField>
+
+### Response
+
+Returns the full Axios `response` object.
+
+### Example
+
+<CodeGroup>
+
+```javascript foundForms
+import { foundForms } from "@/Api/Forms";
+
+const response = await foundForms({
+  id: "form-001",
+  status: "reviewed",
+});
+```
+
+</CodeGroup>
+
+---
+
+## deleteForms
+
+Delete one or more form records.
+
+**Method:** `POST`  
+**Path:** `/formularios/deleteForms`
+
+### Request
+
+<ParamField body="obj" type="object" required>
+  An object identifying the form or forms to delete (e.g., by `id` or a list of IDs).
+</ParamField>
+
+### Response
+
+Returns the full Axios `response` object.
+
+### Example
+
+<CodeGroup>
+
+```javascript deleteForms
+import { deleteForms } from "@/Api/Forms";
+
+const response = await deleteForms({ id: "form-001" });
+```
+
+</CodeGroup>

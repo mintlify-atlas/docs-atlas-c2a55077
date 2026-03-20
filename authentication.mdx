@@ -1,0 +1,138 @@
+---
+title: "Authentication"
+description: "How Mobility 4 handles authentication with Firebase and Bearer tokens."
+---
+
+Mobility 4 uses two separate authentication mechanisms that work together:
+
+- **Firebase Authentication** — verifies user identity with email and password.
+- **Bearer token** — authorizes all REST API calls to the Mobility 4 backend.
+
+## Environment variables
+
+Both mechanisms are configured through environment variables. Copy `.env.example` to `.env` and fill in your values before starting the application.
+
+<CodeGroup>
+
+```ini .env
+VITE_API_URL=https://mobility-app.com/api/
+VITE_ACTIVE_TOKEN=
+VITE_GOOGLE_MAPS_API_KEY=
+VITE_FIREBASE_API_KEY=
+VITE_FIREBASE_AUTH_DOMAIN=
+VITE_FIREBASE_PROJECT_ID=
+VITE_FIREBASE_STORAGE_BUCKET=
+VITE_FIREBASE_MESSAGING_SENDER_ID=
+VITE_FIREBASE_APP_ID=
+VITE_FIREBASE_MEASUREMENT_ID=
+```
+
+```ini .env.example (reference)
+VITE_API_URL=https://mobility-app.com/api/
+VITE_ACTIVE_TOKEN=
+VITE_GOOGLE_MAPS_API_KEY=
+VITE_FIREBASE_API_KEY=
+VITE_FIREBASE_AUTH_DOMAIN=
+VITE_FIREBASE_PROJECT_ID=
+VITE_FIREBASE_STORAGE_BUCKET=
+VITE_FIREBASE_MESSAGING_SENDER_ID=
+VITE_FIREBASE_APP_ID=
+VITE_FIREBASE_MEASUREMENT_ID=
+```
+
+</CodeGroup>
+
+### Key variables
+
+| Variable | Purpose |
+|---|---|
+| `VITE_API_URL` | Base URL for all REST API requests. Defaults to `https://mobility-app.com/api/` if not set. |
+| `VITE_ACTIVE_TOKEN` | Bearer token sent in the `Authorization` header of every API call. |
+| `VITE_FIREBASE_*` | Firebase project credentials used to initialize the Firebase SDK. |
+
+<Warning>
+  Never commit your `.env` file to version control. It contains credentials that grant access to your Firebase project and API backend. Add `.env` to your `.gitignore` file.
+</Warning>
+
+## Firebase setup
+
+<Steps>
+  <Step title="Create a Firebase project">
+    Go to the [Firebase Console](https://console.firebase.google.com) and create a new project, or use an existing one.
+  </Step>
+
+  <Step title="Enable Authentication and Firestore">
+    In your Firebase project, enable **Email/Password** sign-in under **Authentication → Sign-in method**. Also enable **Firestore Database** — Mobility 4 stores user records in a `Usuarios` collection.
+  </Step>
+
+  <Step title="Copy your Firebase config">
+    Go to **Project Settings → General → Your apps** and copy the Firebase configuration object. Map each value to the corresponding `VITE_FIREBASE_*` variable in your `.env` file.
+
+    ```js src/Config/FirebaseConfig.js (reference)
+    const firebaseConfig = {
+      apiKey:            import.meta.env.VITE_FIREBASE_API_KEY,
+      authDomain:        import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+      projectId:         import.meta.env.VITE_FIREBASE_PROJECT_ID,
+      storageBucket:     import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+      messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+      appId:             import.meta.env.VITE_FIREBASE_APP_ID,
+      measurementId:     import.meta.env.VITE_FIREBASE_MEASUREMENT_ID,
+    };
+    ```
+  </Step>
+
+  <Step title="Set your Bearer token">
+    Obtain a valid API bearer token from your Mobility 4 backend administrator and set it as `VITE_ACTIVE_TOKEN` in your `.env` file. This token is attached to every outbound Axios request:
+
+    ```js src/Api/enviroment.js (reference)
+    const settings = {
+      API_URL:      import.meta.env.VITE_API_URL || "https://mobility-app.com/api/",
+      ACTIVE_TOKEN: import.meta.env.VITE_ACTIVE_TOKEN || "",
+    };
+    ```
+
+    ```js API request headers
+    const headers = {
+      Authorization: `Bearer ${settings.ACTIVE_TOKEN}`,
+      "Content-Type": "application/json",
+    };
+    ```
+
+    <Warning>
+      All API modules (Roles, Users, Clients, etc.) share this same static token. If the token is missing or invalid, every API call in the application will fail with an authorization error.
+    </Warning>
+  </Step>
+</Steps>
+
+## Sign-in flow
+
+The sign-in page is at `/auth/sign-in`. Mobility 4 accepts either an **email address** or a **cédula** (7–8 digit numeric ID) as the login identifier.
+
+1. If you enter a cédula, the app queries Firestore (`Usuarios` collection) to look up the associated email address.
+2. Firebase Authentication's `signInWithEmailAndPassword` is called with the resolved email and your password.
+3. After a successful sign-in, the app fetches your full user record from Firestore and stores it in:
+   - **Redux state** (`user` slice, persisted via `redux-persist`)
+   - **`localStorage`** under the key `userData`
+4. You are redirected to `/dashboard/ecommerce`.
+
+## Auth routes
+
+| Route | Purpose |
+|---|---|
+| `/auth/sign-in` | Email or cédula + password login |
+| `/auth/sign-up` | New account registration |
+| `/auth/password-reset` | Send a password reset email |
+
+## Session persistence
+
+Mobility 4 uses `redux-persist` to persist the `user` Redux slice to `localStorage`. This means your session survives page refreshes. The persisted state includes:
+
+- `user` — your full Firestore user record (includes `cliente` and `region` arrays)
+- `token` — your Firebase `accessToken`
+- `isAuthenticated` — boolean session flag
+
+To sign out, the `logout` Redux action clears all three fields and removes the persisted state.
+
+<Note>
+  The Firebase `accessToken` stored in Redux is the identity token for the signed-in Firebase user. It is separate from `VITE_ACTIVE_TOKEN`, which is the static API authorization token used for backend REST calls.
+</Note>

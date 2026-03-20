@@ -1,0 +1,91 @@
+---
+title: "SKU configuration"
+description: "Define and manage product SKUs for use across inventory and forms"
+---
+
+The **SKU Configuration** page at `/configuracionSku` lets you view, edit, and organize the product catalog used across inventory tracking and forms. The page has two tabs: **Configuración de SKU** for managing individual product properties, and **Configuración de Competencias** for flagging products as competitive references.
+
+## Viewing the SKU list
+
+Select a client from the search field to load that client's products. The platform fetches all products from `GET /analytics/products/all-with-names` and filters them by the selected client's ID.
+
+Once a client is selected, you can narrow the list using the filter panel:
+
+| Filter | Description |
+|---|---|
+| **Categoría** | Filter by product category |
+| **Subcategoría** | Filter by product subcategory |
+| **Marca** | Filter by brand |
+| **Búsqueda** | Free-text search across name, category, subcategory, and brand |
+
+Results are paginated at 20 products per page. The filter panel also shows the count of filtered products and total products for the selected client.
+
+## Creating a SKU
+
+<Note>
+SKUs are created through the platform's product management backend. The SKU Configuration page is used to edit existing SKUs and configure their competitive relationships, not to add new ones from scratch.
+</Note>
+
+To link a product to the SKU catalog and make it available in forms and inventory:
+
+<Steps>
+  <Step title="Select a client">
+    Type the client name in the search field and select it from the dropdown. The platform loads all SKUs associated with that client from `GET /analytics/products/all-with-names`.
+  </Step>
+  <Step title="Locate the product">
+    Use the **Categoría**, **Subcategoría**, **Marca**, or free-text search filters to find the product you want to edit. Pagination shows 20 products per page.
+  </Step>
+  <Step title="Expand the product row">
+    Click the expand toggle on a product row to reveal the detail panel showing the product's current **Unidad**, **Cantidad**, **Precio**, and any assigned competitive SKUs.
+  </Step>
+  <Step title="Edit product properties">
+    Update the **Unidad** (unit of measurement), **Cantidad** (quantity), or **Precio** (price) fields inline. The platform sends a `PUT /analytics/products/update/{productoId}` request when you save.
+  </Step>
+  <Step title="Save changes">
+    Click **Guardar cambios** in the filter bar to persist all pending modifications. The platform submits each modified product and updates the price history log via `POST /analytics/products/price-history`.
+  </Step>
+</Steps>
+
+## Editing SKU details
+
+Each expanded product row shows the following editable fields:
+
+| Field | API column | Description |
+|---|---|---|
+| **Unidad** | `UNIT` | Unit of measurement (e.g., `KG`, `UN`, `L`) |
+| **Cantidad** | `QTY` | Default quantity per unit |
+| **Precio** | `PRICE_DS` | Shelf price from price history |
+
+All price changes are logged. The platform stores a price history entry for each change, including the user's UID, the new price (`priceDs`), and the exchange rate.
+
+### Bulk price editing
+
+Click **Edición múltiple** in the filter bar to open the bulk price editor. This modal lists all currently filtered products with their current prices. Edit any prices and click **Guardar** to update them all at once via `POST /analytics/products/price-history`.
+
+## Linking SKUs to products (competitive relationships)
+
+Products flagged with `COMPETENCE = true` in the database serve as competitive references for other products.
+
+### Assigning a competitive SKU
+
+1. Expand a product row in the **Configuración de SKU** tab.
+2. Click **Agregar competencia** to add a competitive SKU slot.
+3. Select a product from the dropdown. Only products flagged as `COMPETENCE = true` for the same client appear as options.
+4. Set the competitive quantity if needed.
+5. Click **Guardar cambios**.
+
+The platform calls `POST /analytics/products/competence/{productoId}` to save the association.
+
+### Removing a competitive SKU
+
+Click the remove icon next to a competitive SKU in the expanded product row. Products that already exist in the database are queued for deletion via `DELETE /analytics/products/competence/{competenciaId}` when you save.
+
+## Competencias tab
+
+The **Configuración de Competencias** tab shows all products for a selected client regardless of their `COMPETENCE` flag. Use this view to review which products are currently marked as competitive references and to toggle the competitive status of any product.
+
+The same client selector, filter panel, and pagination apply here. The **Actualizar** action on each row sends the updated competitive status to the API.
+
+<Tip>
+To see only the products available as competitive options for a given client, switch to the **Configuración de SKU** tab and expand any product row — the competitive dropdown only shows products where `COMPETENCE = true`.
+</Tip>

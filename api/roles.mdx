@@ -1,0 +1,150 @@
+---
+title: "Roles"
+description: "Manage access roles: list all roles, create or update a role, and soft-delete a role by ID."
+---
+
+The roles API lets you manage the access roles used to control permissions across the platform. All endpoints are under the `roles/` namespace.
+
+<Note>
+  All requests require a valid Bearer token. See [Authentication](/api/authentication) for setup instructions.
+</Note>
+
+---
+
+## getRoles
+
+Fetch all roles.
+
+**Method:** `GET`  
+**Path:** `/roles/getRoles`
+
+### Request
+
+No parameters required.
+
+### Response
+
+Returns the full Axios `response` object. Access the role list via `response.data`.
+
+### Example
+
+<CodeGroup>
+
+```javascript getRoles
+import { getRoles } from "@/Api/Roles";
+
+const response = await getRoles();
+console.log(response.data);
+```
+
+```javascript axios equivalent
+import Axios from "axios";
+import settings from "@/Api/enviroment";
+
+const headers = {
+  Authorization: `Bearer ${settings.ACTIVE_TOKEN}`,
+  "Content-Type": "application/json",
+};
+
+const response = await Axios.get(
+  settings.API_URL + "roles/getRoles",
+  { headers }
+);
+```
+
+</CodeGroup>
+
+---
+
+## createUpdateRoles
+
+Create a new role or update an existing one. The server determines whether to insert or update based on the contents of `data` (typically the presence of an `id` field).
+
+**Method:** `POST`  
+**Path:** `/roles/createUpdateRoles`
+
+### Request
+
+<ParamField body="data" type="object" required>
+  A role object. Include an `id` field to update an existing role; omit it to create a new one. The exact shape depends on your role schema.
+</ParamField>
+
+### Response
+
+Returns the full Axios `response` object.
+
+### Example
+
+<CodeGroup>
+
+```javascript create a role
+import { createUpdateRoles } from "@/Api/Roles";
+
+const response = await createUpdateRoles({
+  name: "Field Supervisor",
+  permissions: ["view_dashboard", "manage_routes"],
+});
+```
+
+```javascript update a role
+import { createUpdateRoles } from "@/Api/Roles";
+
+const response = await createUpdateRoles({
+  id: "role-abc",
+  name: "Senior Field Supervisor",
+  permissions: ["view_dashboard", "manage_routes", "approve_orders"],
+});
+```
+
+</CodeGroup>
+
+---
+
+## deleteAcces
+
+Soft-delete an access role by ID.
+
+**Method:** `PUT`  
+**Path:** `/roles/deleteAcces`
+
+<Note>
+  This endpoint uses `PUT`, not `DELETE`. The role is soft-deleted (marked inactive) rather than permanently removed.
+</Note>
+
+### Request
+
+<ParamField body="id" type="string" required>
+  The unique identifier of the role to delete.
+</ParamField>
+
+### Response
+
+Returns the full Axios `response` object.
+
+### Example
+
+<CodeGroup>
+
+```javascript deleteAcces
+import { deleteAcces } from "@/Api/Roles";
+
+const response = await deleteAcces("role-abc");
+```
+
+```javascript axios equivalent
+import Axios from "axios";
+import settings from "@/Api/enviroment";
+
+const headers = {
+  Authorization: `Bearer ${settings.ACTIVE_TOKEN}`,
+  "Content-Type": "application/json",
+};
+
+const response = await Axios.put(
+  settings.API_URL + "roles/deleteAcces",
+  { id: "role-abc" },
+  { headers }
+);
+```
+
+</CodeGroup>

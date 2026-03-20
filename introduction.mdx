@@ -1,0 +1,76 @@
+---
+title: "Introduction"
+description: "Mobility 4 is a field operations management platform for tracking promoters, managing routes and establishments, handling inventory, and generating reports."
+---
+
+## What is Mobility 4?
+
+Mobility 4 is a comprehensive **field operations management platform** built for consumer goods companies, distributors, and field sales teams. It provides a centralized dashboard to coordinate promoters and supervisors working across multiple clients, regions, and establishments.
+
+The platform connects back-office administrators with field workers in real time — enabling route planning, visit tracking, form completion, inventory management, and performance reporting all in one place.
+
+## Key capabilities
+
+<CardGroup cols={2}>
+  <Card title="Field tracking" icon="map-location-dot" href="/features/tracking">
+    Track promoter locations in real time using GPS coordinates visualized on an interactive map.
+  </Card>
+  <Card title="Route management" icon="route" href="/features/routes">
+    Assign establishments to routes and link routes to users for structured daily field plans.
+  </Card>
+  <Card title="Forms & surveys" icon="clipboard-list" href="/features/forms">
+    Build dynamic forms, deploy them to field workers, and collect visit data from establishments.
+  </Card>
+  <Card title="Inventory control" icon="boxes-stacked" href="/features/inventory">
+    Manage product inventory per promoter, track transfers, and review movement history.
+  </Card>
+  <Card title="Purchase orders" icon="file-invoice" href="/features/purchase-orders">
+    Generate and manage purchase orders directly from the platform.
+  </Card>
+  <Card title="Reports & analytics" icon="chart-bar" href="/features/reports">
+    Download detailed operational reports and analyze permissions and access patterns.
+  </Card>
+  <Card title="User & role management" icon="users-gear" href="/features/users">
+    Create users, assign roles with granular permissions, and manage access by client and region.
+  </Card>
+  <Card title="SKU configuration" icon="barcode" href="/features/sku-configuration">
+    Define and manage product SKUs used across inventory, forms, and purchase orders.
+  </Card>
+</CardGroup>
+
+## How it works
+
+Mobility 4 follows a hierarchical operational model:
+
+1. **Clients** are the companies or brands being served in the field.
+2. **Regions** group geographic areas under each client.
+3. **Establishments** are the physical locations (stores, points of sale) visited by field workers.
+4. **Routes** bundle establishments into daily visit plans assigned to users.
+5. **Users** (promoters, supervisors, administrators) carry out field operations and report back through the platform.
+
+## Platform architecture
+
+Mobility 4 is a React single-page application backed by a REST API. Authentication is handled via Firebase. All API calls use Bearer token authorization.
+
+<CardGroup cols={3}>
+  <Card title="Architecture" icon="sitemap" href="/concepts/architecture">
+    Understand the technical structure
+  </Card>
+  <Card title="Roles & permissions" icon="shield-halved" href="/concepts/roles-permissions">
+    Learn how access control works
+  </Card>
+  <Card title="Regions & clients" icon="earth-americas" href="/concepts/regions-clients">
+    Explore the data hierarchy
+  </Card>
+</CardGroup>
+
+## Get started
+
+<CardGroup cols={2}>
+  <Card title="Quickstart" icon="rocket" href="/quickstart">
+    Set up Mobility 4 and complete your first field operation
+  </Card>
+  <Card title="Authentication" icon="key" href="/authentication">
+    Configure Firebase authentication and API tokens
+  </Card>
+</CardGroup>

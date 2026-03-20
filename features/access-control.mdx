@@ -1,0 +1,98 @@
+---
+title: "Access control"
+description: "Manage platform access entries and view per-user permission analytics in Mobility 4."
+---
+
+Access control in Mobility 4 operates at two levels: **access entries** define the navigable routes available on the platform, and **permission analytics** lets you inspect and update which specific dashboard sections and report types each user can see.
+
+<CardGroup cols={2}>
+  <Card title="Access" icon="shield-halved" href="/features/access-control#access-page">
+    Define and manage the named route entries stored in the Firestore `Acceso` collection. These entries are the building blocks used when configuring role module assignments.
+  </Card>
+  <Card title="Permissions analytics" icon="chart-bar" href="/features/access-control#permissions-analytics">
+    View per-user analytics permissions and update individual or bulk user access to dashboard sections, inventory, reports, AI features, and more.
+  </Card>
+</CardGroup>
+
+## Access page
+
+**Route:** `/access`
+
+The **Accesos** page manages the master list of access entries stored in Firestore's `Acceso` collection. Each entry represents a navigable route in the application and carries the metadata that the sidebar and role assignment forms use.
+
+### Access entry fields
+
+| Field | Description |
+|---|---|
+| **Nombre** (`text`) | Display name shown in the sidebar and role module picker |
+| **Ruta** (`path`) | Application route path (e.g. `/User`, `/roles`, `/reportes`) |
+| **Icono** (`icon`) | Icon identifier rendered in the sidebar |
+| **Grupo** (`group`) | Sidebar group this entry belongs to |
+| **Estatus** | Active or inactive — only `activo` entries appear in the role module picker |
+
+### Creating an access entry
+
+Click **Crear nuevo Acceso** to open the access creation modal. Fill in the **Nombre del Acceso**, **Ruta**, **Icono** (optional), and **Grupo** (optional) fields, then set the **Estatus** toggle and click **Crear**. The entry is written directly to the Firestore `Acceso` collection.
+
+### Editing an access entry
+
+Click the edit (pencil) button in the **Acciones** column to open the modal pre-filled with the existing entry's data. Update any fields and click **Actualizar** to save. The grid row updates immediately.
+
+<Note>
+  Access entries with `estatus: activo` are loaded dynamically in the **NewRol** modal. If you set an entry to `inactivo`, it will no longer appear in the module picker when creating or editing roles — but existing role assignments that already include that path are not automatically removed.
+</Note>
+
+## Permissions analytics
+
+**Route:** `/permisosAnalytics`
+
+The **Permisos Analytics** page lets you view and manage the fine-grained analytics permissions assigned to each user. Unlike the role-based module system, these permissions control access to specific sections within analytics dashboards and report views.
+
+### User grid
+
+The page displays a grid of all platform users with their analytics permission data. Each row shows:
+
+| Column | Description |
+|---|---|
+| **Cédula** | User's national ID |
+| **Nombre** | First name |
+| **Apellido** | Last name |
+| **Tipo de Usuario** | User type classification |
+| **Clientes** | Clients assigned to the user |
+| **Región** | Regions assigned to the user |
+| **Estatus** | Active or inactive |
+| **Acciones** | Open the individual permissions editor |
+
+### Permission sections
+
+Clicking the edit button for a user opens the **GridPermisos** modal, which organizes permissions into the following sections:
+
+| Section | Description |
+|---|---|
+| **Dashboard** | Access to the main operational dashboard |
+| **Grid Principal** | Access to the primary data grid view |
+| **Dashboard de Encuestas** | Access to the surveys analytics dashboard |
+| **Inventario** | Access to inventory views and data |
+| **Precios** | Access to pricing data and reports |
+| **Operaciones** | Access to operations analytics |
+| **Inteligencia Artificial** | Access to AI-powered features and insights |
+| **Tienda Perfecta** | Access to the perfect store metrics view |
+| **Reportes** | Access to specific report types |
+
+### Bulk permissions
+
+You can select multiple users in the grid using the checkboxes and click **Permisos masivos** to open the **PermisosMasivos** modal. This lets you apply the same permission configuration to all selected users at once.
+
+<Tip>
+  Use bulk permissions when onboarding a new team of users who all share the same analytics access requirements. Select all users with the same role and apply a permission template in one operation.
+</Tip>
+
+## How access and permissions relate to roles
+
+Roles (defined at `/roles`) control which **sidebar routes** a user can navigate to. Access entries (managed at `/access`) are the data source for those routes. Permissions analytics (at `/permisosAnalytics`) control what a user sees **inside** analytics and reporting modules — they are independent of the role module list.
+
+A user's complete access profile is determined by:
+
+1. Their **role** → which sidebar modules they can reach
+2. Their **access entries** → the available routes in the system
+3. Their **analytics permissions** → what data sections they can view within those modules

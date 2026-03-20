@@ -1,0 +1,79 @@
+---
+title: "Activation"
+description: "Activate and manage field promoter assignments in Mobility 4"
+---
+
+The **Activation** page (`/activacion`) lets you track and review the daily activation records of field promoters — the moment they start and end their working day on the mobile app. Each activation record captures the promoter's client, region, profile, and timestamps for the activation, start, and close events.
+
+## What activation means
+
+In Mobility 4, a promoter "activates" when they open and confirm their session in the mobile app at the start of a field day. The platform records:
+
+- **Fecha Activación** — the date the session was opened.
+- **Fecha Inicio** — the timestamp when the promoter began their route.
+- **Fecha Cierre** — the timestamp when the promoter closed the session.
+
+These records let supervisors verify that promoters are working the correct days, within the correct client and region scope.
+
+## Activation search workflow
+
+<Steps>
+  <Step title="Select a client">
+    Choose a client from the **Cliente** dropdown. Available clients are loaded from the `cliente` array in your `userData` stored in `localStorage`.
+  </Step>
+
+  <Step title="Select a region">
+    Choose a region from the **Región** dropdown. Only regions with `estatus === 'activo'` are listed, loaded from `GET /regiones/getRegion` at page load.
+  </Step>
+
+  <Step title="Select a date">
+    Enter or pick a date using the **Fecha** date input. The date is formatted as `YYYY-MM-DD` before being sent to the API.
+  </Step>
+
+  <Step title="Run the search">
+    Click **Buscar**. The page calls `POST /activacion/getActivationsWhitFilters` with the payload:
+
+    ```json
+    {
+      "cliente": "ClienteName",
+      "region": "RegionName",
+      "fecha": "YYYY-MM-DD"
+    }
+    ```
+
+    Results appear in the data grid below. If no records match, the grid displays the message "No se encontraron activaciones con los filtros seleccionados".
+  </Step>
+
+  <Step title="Review and export">
+    Once results load, you can sort or filter any column inline. If results are present, the **Descargar** button appears — click it to export the current results as an `.xlsx` file named `activaciones_YYYY-MM-DD_HH-mm-ss.xlsx`.
+  </Step>
+</Steps>
+
+## Viewing a promoter's location
+
+Each activation row has a globe icon in the **Acciones** column. Clicking it opens the **Ubicación del Usuario** modal, which displays a Google Map with two markers:
+
+- **Marker I** — the promoter's GPS coordinates at the moment they started the session (`coordenadasInicio`).
+- **Marker C** — the GPS coordinates at the moment they closed the session (`coordenadasCierre`).
+
+Clicking either marker shows an info window with the exact latitude, longitude, and timestamp. If the map bounds include both markers, it automatically fits the view to show both points.
+
+<Warning>
+If a promoter did not grant location permissions on their device, or if the activation was created without GPS data, the location modal will display "No hay coordenadas disponibles para este usuario" instead of a map.
+</Warning>
+
+## Grid columns
+
+| Column | Field | Description |
+|---|---|---|
+| Usuario | `nombre` | Full name of the promoter |
+| Cliente | `cliente` | Client the promoter is assigned to |
+| Región | `region` | Region the promoter operates in |
+| Perfil | `perfil` | User profile type (e.g., Promotor, Supervisor) |
+| Fecha | `fechaActivacion` | Date the session was activated |
+| Fecha Inicio | `fechaInicio` | Date and time the working session began |
+| Fecha Cierre | `fechaCierre` | Date and time the working session ended |
+
+## Clearing filters
+
+Click **Limpiar** to reset all filter dropdowns, clear the results grid, and return the page to its initial state.

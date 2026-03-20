@@ -1,0 +1,204 @@
+---
+title: "Tracking"
+description: "Track field operator GPS coordinates by client, region, user, and date."
+---
+
+The tracking API provides real-time and historical GPS coordinate data for field operators. Functions in `Seguimiento.js` use the `clientes/`, `regiones/`, `usuarios/`, and `coordenadas/` namespaces.
+
+<Note>
+  All requests require a valid Bearer token. See [Authentication](/api/authentication) for setup instructions.
+</Note>
+
+---
+
+## getClients
+
+Fetch all clients. Used to populate the client selector in the tracking UI.
+
+**Method:** `GET`  
+**Path:** `/clientes/getClients`
+
+### Request
+
+No parameters required.
+
+### Response
+
+Returns the full Axios `response` object. Access records via `response.data`.
+
+### Example
+
+<CodeGroup>
+
+```javascript getClients
+import { getClients } from "@/Api/Seguimiento";
+
+const response = await getClients();
+console.log(response.data);
+```
+
+</CodeGroup>
+
+---
+
+## getRegion
+
+Fetch all regions. Used to populate the region selector in the tracking UI.
+
+**Method:** `GET`  
+**Path:** `/regiones/getRegion`
+
+### Request
+
+No parameters required.
+
+### Response
+
+Returns `response.data` — an array of region objects.
+
+### Example
+
+<CodeGroup>
+
+```javascript getRegion
+import { getRegion } from "@/Api/Seguimiento";
+
+const regions = await getRegion();
+console.log(regions);
+```
+
+</CodeGroup>
+
+---
+
+## getUserClientAndRegion
+
+Fetch all users filtered by client and region. Returns the field operators active within the specified scope.
+
+**Method:** `POST`  
+**Path:** `/usuarios/getUserClientAndRegion`
+
+### Request
+
+<ParamField body="cliente" type="string" required>
+  The client identifier to filter users by.
+</ParamField>
+
+<ParamField body="region" type="string" required>
+  The region identifier to filter users by.
+</ParamField>
+
+### Response
+
+Returns the full Axios `response` object. Access the user list via `response.data`.
+
+### Example
+
+<CodeGroup>
+
+```javascript getUserClientAndRegion
+import { getUserClientAndRegion } from "@/Api/Seguimiento";
+
+const response = await getUserClientAndRegion("client-xyz", "North Zone");
+console.log(response.data);
+```
+
+```javascript axios equivalent
+import Axios from "axios";
+import settings from "@/Api/enviroment";
+
+const headers = {
+  Authorization: `Bearer ${settings.ACTIVE_TOKEN}`,
+  "Content-Type": "application/json",
+};
+
+const response = await Axios.post(
+  settings.API_URL + "usuarios/getUserClientAndRegion",
+  { cliente: "client-xyz", region: "North Zone" },
+  { headers }
+);
+```
+
+</CodeGroup>
+
+---
+
+## getCoordenadasWithDay
+
+Fetch the GPS coordinates logged by a specific user on a specific date.
+
+**Method:** `POST`  
+**Path:** `/coordenadas/getCoordenadasWithDay`
+
+### Request
+
+<ParamField body="cliente" type="string" required>
+  The client identifier.
+</ParamField>
+
+<ParamField body="region" type="string" required>
+  The region identifier.
+</ParamField>
+
+<ParamField body="usuario" type="string" required>
+  The user identifier (Firebase UID or username) whose coordinates to retrieve.
+</ParamField>
+
+<ParamField body="fecha" type="string" required>
+  The date for which to retrieve coordinates, in `YYYY-MM-DD` format.
+</ParamField>
+
+### Response
+
+Returns the full Axios `response` object. Access the coordinate records via `response.data` — typically an array of `{ lat, lng, timestamp }` objects.
+
+<ResponseField name="lat" type="number">
+  Latitude of the logged GPS position.
+</ResponseField>
+
+<ResponseField name="lng" type="number">
+  Longitude of the logged GPS position.
+</ResponseField>
+
+<ResponseField name="timestamp" type="string">
+  ISO 8601 timestamp of when the coordinate was recorded.
+</ResponseField>
+
+### Example
+
+<CodeGroup>
+
+```javascript getCoordenadasWithDay
+import { getCoordenadasWithDay } from "@/Api/Seguimiento";
+
+const response = await getCoordenadasWithDay(
+  "client-xyz",
+  "North Zone",
+  "user-uid-123",
+  "2026-03-20"
+);
+console.log(response.data);
+```
+
+```javascript axios equivalent
+import Axios from "axios";
+import settings from "@/Api/enviroment";
+
+const headers = {
+  Authorization: `Bearer ${settings.ACTIVE_TOKEN}`,
+  "Content-Type": "application/json",
+};
+
+const response = await Axios.post(
+  settings.API_URL + "coordenadas/getCoordenadasWithDay",
+  {
+    cliente: "client-xyz",
+    region: "North Zone",
+    usuario: "user-uid-123",
+    fecha: "2026-03-20",
+  },
+  { headers }
+);
+```
+
+</CodeGroup>

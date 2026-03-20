@@ -1,0 +1,82 @@
+---
+title: "Route templates"
+description: "Create reusable route templates to standardize field visit plans"
+---
+
+The **Route Templates** page at `/plantillaRutas` lets you define named visit route templates per region. Each template lists the establishments a promoter should visit and can be assigned to specific users. Templates help standardize field operations and reduce manual scheduling.
+
+## Listing templates
+
+On first load, the template list is empty until you select a region. Use the **region selector** in the top-right to filter templates by region. Templates for the selected region appear in the data grid with the following columns:
+
+| Column | Description |
+|---|---|
+| **Nombre** | Template name, displayed in uppercase |
+| **Región** | The region or list of regions the template covers |
+| **Orden ruta** | The visit order or route sequence identifier |
+| **Acciones** | Buttons to manage establishments, view the route, or delete the template |
+
+The total count of templates in the current filter appears next to the page title.
+
+You can inline-edit the **Nombre** and **Orden ruta** fields directly in the grid. The platform saves changes via `POST /rutasPlanilla/actualizarNombrePlantilla`.
+
+## Creating a template
+
+<Steps>
+  <Step title="Open the creation modal">
+    Click **Crear** in the top-right of the page. The creation modal opens with fields for **Nombre de la plantilla**, **Orden de ruta**, and **Región**.
+  </Step>
+  <Step title="Enter the template name">
+    Type the template name in the **Nombre de la plantilla** field. Names are stored in uppercase regardless of how you type them.
+  </Step>
+  <Step title="Set the route order">
+    Optionally enter a value in the **Orden de ruta** field to specify the sequence in which this route should be executed.
+  </Step>
+  <Step title="Select a region">
+    Choose a region from the **Región** dropdown. The available regions are derived from the existing templates in the system.
+  </Step>
+  <Step title="Save the template">
+    Click the submit button. The platform sends `POST /rutasPlanilla/crearPlantilla` with the `nombre_plantilla`, `orden_ruta`, and `region` fields. The template list refreshes automatically after creation.
+  </Step>
+</Steps>
+
+<Note>
+Both **Nombre de la plantilla** and **Región** are required. The submit button remains disabled until both fields have values.
+</Note>
+
+## Assigning establishments to a template
+
+Click the **Administrar establecimientos** icon (building icon) in a template's **Acciones** column. The platform navigates to `/TemplateRoute/AssingEstablishment` and passes the template object as navigation state.
+
+On the assignment page, you can search for establishments and add or remove them from the template. The platform uses `POST /rutasPlanilla/getEstablecimientosByPlantilla` to fetch the establishments currently assigned to the selected template.
+
+## Assigning users to a template
+
+Click the **Mostrar ruta** icon (route icon) in a template's **Acciones** column. The platform navigates to `/TemplateRoute/AssingRoute` and passes the template object as navigation state.
+
+On this page, you assign field users to the template. The platform calls `POST /rutasPlanilla/asignarPlantillaUsuario` to save the user-to-template assignment.
+
+## Using a template
+
+Click **Usar** in the top-right of the templates list to navigate to `/usePlantilla`. This page applies an existing template to generate a scheduled route, making the template's establishments and visit order available for field operations.
+
+## Deleting a template
+
+Click the **Eliminar** icon (trash icon) in a template's **Acciones** column. A confirmation modal appears. Confirming sends `POST /rutasPlanilla/eliminarPlantilla` with the template ID. The template list refreshes after deletion.
+
+<Warning>
+Deleting a template is permanent. Any users currently assigned to that template will lose their route association.
+</Warning>
+
+## API endpoints
+
+The Route Templates feature uses the `rutasPlanilla/` API namespace with Bearer token authentication:
+
+| Endpoint | Method | Description |
+|---|---|---|
+| `rutasPlanilla/getrutasPlanilla` | GET | Fetch all route templates |
+| `rutasPlanilla/crearPlantilla` | POST | Create a new template |
+| `rutasPlanilla/actualizarNombrePlantilla` | POST | Update template name or route order |
+| `rutasPlanilla/eliminarPlantilla` | POST | Delete a template by ID |
+| `rutasPlanilla/getEstablecimientosByPlantilla` | POST | Get establishments assigned to a template |
+| `rutasPlanilla/asignarPlantillaUsuario` | POST | Assign a user to a template |

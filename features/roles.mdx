@@ -1,0 +1,95 @@
+---
+title: "Roles"
+description: "Configure roles and their module permissions in Mobility 4 to control what each user type can access across the platform."
+---
+
+Roles define which navigation modules a user can access after logging in. Each user is assigned a **perfil** (profile) that maps to a role, and the role's `menu` array determines the sidebar items and routes available to that user.
+
+**Route:** `/roles`
+
+## Roles list
+
+When you open the **Roles** page, the grid loads all roles from Firestore via:
+
+```http
+GET /roles/getRoles
+```
+
+Each row in the grid shows:
+
+| Column | Description |
+|---|---|
+| **Nombre** | Role name |
+| **Módulos** | Chip-style tags showing each module the role can access |
+| **Estatus** | Active or inactive badge |
+| **Acciones** | Edit button to open the role form |
+
+You can filter by name or status using the inline filter row, and paginate results with page sizes of 5, 10, 15, 20, or 50.
+
+## Creating a role
+
+Click **Crear nuevo Rol** to open the role creation modal.
+
+<Steps>
+  <Step title="Enter the role name">
+    Type a name for the role in the **Nombre del Rol** field. The name must be at least 3 characters.
+  </Step>
+  <Step title="Select modules">
+    The modal loads all active access records from the Firestore `Acceso` collection and displays them as selectable chips. Use the search box to filter by module name. Click a chip to toggle it on or off. Use **Seleccionar todos** to select or deselect all currently filtered modules at once.
+
+    Each selected module is stored with its `path`, `text`, `icon`, and `sort` values so the sidebar can render it correctly.
+  </Step>
+  <Step title="Set status">
+    Toggle the **Estatus** switch to set the role as **Activo** or **Inactivo**. Only active roles appear in the profile selector when creating or pre-registering users.
+  </Step>
+  <Step title="Save the role">
+    Click **Crear Rol**. The role is written to the Firestore `roles` collection via `POST /roles/createUpdateRoles` and the list refreshes automatically.
+  </Step>
+</Steps>
+
+## Editing a role
+
+Click the edit (pencil) button in the **Acciones** column to open the same modal pre-filled with the role's current name, selected modules, and status. Click **Actualizar Rol** to save changes. The grid row updates in place without a full reload.
+
+## Deleting role access
+
+To remove a role's access entry, call:
+
+```http
+PUT /roles/deleteAcces
+```
+
+```json
+{ "id": "<role-id>" }
+```
+
+<Warning>
+  Deleting a role's access record is irreversible. Any user whose **perfil** maps to this role will lose their module access immediately. Before deleting, reassign affected users to a different role or update the role to remove only the specific modules you want to restrict.
+</Warning>
+
+## How roles control access
+
+When a user logs in, the platform reads their assigned `perfil` value, looks up the matching role in Firestore, and loads the role's `menu` array into the user's session. The sidebar renders only the items present in that array.
+
+During user creation or pre-registration, the **Módulos** step and the **Perfil** selector both reference the roles defined here. Changing a role's module list affects all users assigned to that role on their next login.
+
+<Tip>
+  Keep role names descriptive and scoped — for example, `Promotor Venezuela`, `Supervisor Región Norte` — so that administrators can quickly identify the correct role when assigning users.
+</Tip>
+
+## API reference
+
+| Operation | Method | Endpoint |
+|---|---|---|
+| List all roles | `GET` | `/roles/getRoles` |
+| Create or update a role | `POST` | `/roles/createUpdateRoles` |
+| Delete role access | `PUT` | `/roles/deleteAcces` |
+
+All requests require a Bearer token:
+
+```javascript
+const headers = {
+  Authorization: `Bearer ${token}`,
+  "Content-Type": "application/json",
+};
+```

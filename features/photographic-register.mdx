@@ -1,0 +1,80 @@
+---
+title: "Photographic register"
+description: "Document field visits with photo evidence using the photographic register"
+---
+
+The **Photographic Register** (`Registro Fotográfico`) lets you search, view, and download photos taken by promoters during field visits. Photos are organized by establishment and linked to the form submission that captured them. You can export the photo set as a ZIP archive, a PDF document, or a PowerPoint presentation.
+
+## Route
+
+| Route | Purpose |
+|---|---|
+| `/registroFotografico` | Search and view field visit photos |
+
+## How photos are linked to visits
+
+When a promoter fills out a form on their mobile device, they can attach photos as part of their response. Those photos are stored in the gallery (`galeria`) collection and linked to the form record via the establishment, promoter, region, and date. The Photographic Register queries this gallery using `POST /galeria/getImagesFormsRegionMultiple`, which accepts a combination of client, region, date range, promoter, establishment, and form name as filters.
+
+## Searching for photos
+
+<Steps>
+  <Step title="Select a client">
+    Choose a **Cliente** from the dropdown. The options are loaded from your user profile.
+  </Step>
+  <Step title="Select one or more regions">
+    Open the **Regiones** multi-select and check the regions you want to include. You can use **Seleccionar todo** to select all regions at once.
+  </Step>
+  <Step title="Set a date range">
+    Click the **Fecha** field to open the date picker and select a range. Both a start and end date are required.
+  </Step>
+  <Step title="Apply optional filters">
+    The following filters are optional but help narrow down results:
+    - **Formularios**: Filter by the name of the form the photo was attached to. Loaded automatically when you select a client via `POST /formularios/getFormsWeb`.
+    - **Usuario**: Filter by a specific promoter. Loaded automatically when you select a client and region via the Seguimiento API.
+    - **Establecimiento**: Filter by a specific establishment. Loaded via `POST /galeria/getEstablecimientosFilterRegionMultiple`.
+    - **Cadena**: Filter by retail chain. Loaded via `GET /EstablecimientosNuevos/getCadenas`.
+    - **Etiqueta**: Filter by photo tag. Loaded via `GET /formularios/getTag`.
+  </Step>
+  <Step title="Run the search">
+    Click **Buscar**. The system calls `POST /galeria/getImagesFormsRegionMultiple` with all selected filters. Results are grouped by establishment and sorted alphabetically.
+
+    If an **Etiqueta** filter is active, only photos tagged with that label are shown within each result group.
+  </Step>
+</Steps>
+
+<Note>
+  You must select at least a **Cliente**, one **Región**, and a **Fecha** range before searching. The search will show an error if any of these three fields are missing.
+</Note>
+
+## Viewing photos
+
+Each result card shows the establishment name, promoter, form date, and a grid of thumbnail photos. Click any thumbnail to open the **carrusel** (lightbox) for that establishment, allowing you to scroll through all photos in that record.
+
+To select specific photos for export, click the checkboxes on individual thumbnails. Use **Seleccionar todo** to select all visible photos, or clear your selection before downloading to export everything.
+
+## Downloading photos
+
+Click the **Descargar** button and choose one of the export formats:
+
+<CardGroup cols={2}>
+  <Card title="ZIP archive" icon="file-archive">
+    Downloads all photos (or selected photos) as a `.zip` file. Each photo is named using the establishment name and a sequential index. The file is named `Registro_Fotografico_YYYY-MM-DD_HH-mm.zip`.
+  </Card>
+  <Card title="PDF document" icon="file-pdf">
+    Generates a PDF with two photos per row, each labeled with the establishment name and form date. The file is named `Registro_Fotografico_YYYY-MM-DD_HH-mm.pdf`.
+  </Card>
+  <Card title="PowerPoint (2 photos)" icon="file-powerpoint">
+    Creates a `.pptx` presentation with 2 photos per slide. Each photo is accompanied by the establishment name, promoter, and form date.
+  </Card>
+  <Card title="PowerPoint (4 photos)" icon="file-powerpoint">
+    Creates a `.pptx` presentation in a 2×2 grid layout with 4 photos per slide. Each photo is labeled with the establishment name.
+  </Card>
+</CardGroup>
+
+<Tip>
+  If you select specific photos using the checkboxes before downloading, only the selected photos are included in the export. If no photos are selected, all photos from the search results are exported.
+</Tip>
+
+## Clearing filters
+
+Click **Limpiar** at the top of the page to reset all filters and clear the search results.

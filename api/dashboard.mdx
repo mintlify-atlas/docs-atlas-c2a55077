@@ -1,0 +1,102 @@
+---
+title: "Dashboard"
+description: "Fetch dashboard indicators and metrics for the Mobility 4 operations dashboard."
+---
+
+The dashboard API provides aggregated indicators used to populate the main operations dashboard. All endpoints are under the `mobility-4/dashboard/` namespace.
+
+<Note>
+  All requests require a valid Bearer token. See [Authentication](/api/authentication) for setup instructions.
+</Note>
+
+---
+
+## getIndicators
+
+Fetch all dashboard indicators.
+
+**Method:** `GET`  
+**Path:** `/mobility-4/dashboard/indicators`
+
+### Request
+
+No parameters required.
+
+### Response
+
+Returns the parsed `response.data` — an array or object of indicator records as defined by the server.
+
+### Example
+
+<CodeGroup>
+
+```javascript getIndicators
+import { getIndicators } from "@/Api/dashboard";
+
+const indicators = await getIndicators();
+console.log(indicators);
+```
+
+```javascript axios equivalent
+import Axios from "axios";
+import settings from "@/Api/enviroment";
+
+const headers = {
+  Authorization: `Bearer ${settings.ACTIVE_TOKEN}`,
+  "Content-Type": "application/json",
+};
+
+const { data } = await Axios.get(
+  settings.API_URL + "mobility-4/dashboard/indicators",
+  { headers }
+);
+```
+
+</CodeGroup>
+
+---
+
+## getIndicatorById
+
+Fetch a single dashboard indicator by its ID.
+
+**Method:** `GET`  
+**Path:** `/mobility-4/dashboard/indicators/:id`
+
+### Request
+
+<ParamField path="id" type="string" required>
+  The unique identifier of the indicator to retrieve.
+</ParamField>
+
+### Response
+
+Returns the parsed `response.data` — a single indicator object.
+
+### Example
+
+<CodeGroup>
+
+```javascript getIndicatorById
+import { getIndicatorById } from "@/Api/dashboard";
+
+const indicator = await getIndicatorById("indicator-123");
+console.log(indicator);
+```
+
+```javascript axios equivalent
+import Axios from "axios";
+import settings from "@/Api/enviroment";
+
+const headers = {
+  Authorization: `Bearer ${settings.ACTIVE_TOKEN}`,
+  "Content-Type": "application/json",
+};
+
+const { data } = await Axios.get(
+  settings.API_URL + "mobility-4/dashboard/indicators/indicator-123",
+  { headers }
+);
+```
+
+</CodeGroup>

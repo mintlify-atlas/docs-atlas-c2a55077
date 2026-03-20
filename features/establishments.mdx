@@ -1,0 +1,69 @@
+---
+title: "Establishments"
+description: "Manage physical points of sale and store locations in Mobility 4"
+---
+
+The **Establishments** page (`/establecimientosNuevos`) gives you a centralized view of every physical store or point of sale registered in the platform. You can filter by region or client, inspect details, verify records, view each store's location on Google Maps, and create or edit establishments.
+
+## What you can do
+
+- Browse the complete list of establishments loaded from `GET /EstablecimientosNuevos/getAllEstablishment`.
+- Filter, sort, and search by any column directly in the data grid.
+- Create a new establishment with the **Crear nuevo Establecimiento** button.
+- Edit an existing establishment by clicking the pencil icon, which fetches full details via `POST /EstablecimientosNuevos/getEstablishmentData`.
+- Toggle the **Verificado** checkbox to mark an establishment as reviewed; changes are persisted to Firestore and via `POST /EstablecimientosNuevos/updateRevision` in real time using optimistic updates.
+- Click the map-pin icon to open the establishment's coordinates in Google Maps in a new tab.
+- Assign a sales channel per client using the signpost icon.
+- Select multiple establishments and use **Edición múltiple** to batch-edit service assignments.
+
+## Establishment data fields
+
+<CardGroup cols={2}>
+  <Card title="ID" icon="hash">
+    The numeric identifier of the establishment (`ID`). Used as the primary reference across route assignments, analytics, and channel configuration.
+  </Card>
+  <Card title="Nombre" icon="store">
+    The display name of the establishment (`nombre_establecimiento`). Shown in the routes dual-panel and on map markers.
+  </Card>
+  <Card title="Ciudad" icon="building">
+    The city where the establishment is located, mapped from `nombre_ciudad` in the API response.
+  </Card>
+  <Card title="Región" icon="map">
+    The region the establishment belongs to (`nombre_region`). Establishments are grouped and filtered by region throughout the platform — in routes, seguimiento, and activation.
+  </Card>
+  <Card title="Estatus" icon="circle-check">
+    Active or inactive status (`estatus`). Displayed as a color-coded badge: green for **Activo**, red for **Inactivo**.
+  </Card>
+  <Card title="Verificado" icon="clipboard-check">
+    A boolean flag (`revisado`) that indicates whether a supervisor has manually reviewed the establishment's data. Toggle it directly in the grid.
+  </Card>
+  <Card title="Coordenadas" icon="map-pin">
+    Latitude and longitude stored as `{ lat, lng }`. When present, the map-pin action button appears on that row so you can open the location in Google Maps.
+  </Card>
+  <Card title="Razón social" icon="briefcase">
+    Legal company name (`razon_social`), surfaced in the edit form as `descripcion_razon_social`.
+  </Card>
+</CardGroup>
+
+## Filtering by region and client
+
+Establishments are organized by region throughout the platform. On the Establishments page itself you can use the built-in DataGrid header filters and column filters to narrow results by `nombre_region`, `nombre_ciudad`, `estatus`, or any other visible field.
+
+When assigning establishments to a promoter in the Routes workflow, the **Región** dropdown restricts the available stores list to only those matching the promoter's assigned regions.
+
+## Creating and editing
+
+Clicking **Crear nuevo Establecimiento** opens the `NewEstablisment` form. When editing, the platform first fetches the complete record from `POST /EstablecimientosNuevos/getEstablishmentData` before opening the form, ensuring all fields — including those not visible in the grid — are populated.
+
+<Tip>
+After saving, the grid refreshes automatically by re-calling `getAllEstablishment`. You do not need to reload the page.
+</Tip>
+
+## API reference
+
+| Function | Method | Endpoint | Description |
+|---|---|---|---|
+| `getAllEstablishment` | GET | `/EstablecimientosNuevos/getAllEstablishment` | Returns all establishments |
+| `getEstablishmentData` | POST | `/EstablecimientosNuevos/getEstablishmentData` | Fetches complete data for a single establishment; requires `{ id }` |
+| `saveNewEstablishment` | POST | `/EstablecimientosNuevos/saveNewEstablishment` | Creates a new establishment; requires `{ dataFinal }` |
+| `updateTimeInStore` | POST | `/analytics/extras/updateTimeInStore` | Updates the target visit duration for a client at a given store |

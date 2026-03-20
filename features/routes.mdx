@@ -1,0 +1,62 @@
+---
+title: "Routes"
+description: "Plan and assign field routes to promoters in Mobility 4"
+---
+
+The **Routes** page (`/AsignNewestablishments`) is where you manage the complete route assignment lifecycle for your field promoters. From this page you can see every promoter assigned to you, set their route order, and navigate to the three sub-workflows that make up a full route configuration.
+
+## What you can do
+
+- View the full list of promoters assigned to your account along with their region, client portfolio, and current route order.
+- Edit the **Orden Ruta** (route order) field inline directly in the table.
+- Navigate to **Assign Establishments** to choose which stores a promoter will visit.
+- Navigate to **Assign Route** to drag-and-drop establishments onto a weekly calendar.
+- Navigate to **Assign Template** to apply a pre-built route template to a promoter.
+
+## Route creation workflow
+
+<Steps>
+  <Step title="Open the Routes page">
+    Navigate to `/AsignNewestablishments`. The table loads all promoters assigned to your user account by calling `POST /usuarios/getaUserNewFormat` with your `uid` from `localStorage`.
+  </Step>
+
+  <Step title="Assign establishments to the promoter">
+    Click the **Asignar Establecimientos** icon (store icon) on any row. You are taken to `/routes/assign-establishments` where a dual-panel interface shows **Establecimientos Disponibles** on the left and **Establecimientos Asignados** on the right.
+
+    - Use the **Región** dropdown to filter available stores by the promoter's assigned regions.
+    - Search by store name or ID in either panel.
+    - Select one or more stores using the checkboxes and click the right-arrow transfer button to assign them.
+    - To remove stores, select them in the right panel and click the left-arrow transfer button, or click the trash icon on an individual row and confirm the deletion modal.
+  </Step>
+
+  <Step title="Set visit days for each establishment">
+    Click the **Mostrar Ruta** icon (route icon) on any row. You are taken to `/routes/assign-route`, which opens a full-screen weekly calendar view (Monday through Sunday).
+
+    - The left sidebar lists all establishments currently assigned to the promoter.
+    - Drag an establishment card from the sidebar and drop it onto a day column to schedule it for that day.
+    - You can also click the **+** button at the bottom of any day column to search and add an establishment via a dropdown without dragging.
+    - Clicking the trash icon on a placed card removes it from that day without removing the overall assignment.
+    - Click **Guardar Ruta** to persist the schedule.
+  </Step>
+
+  <Step title="(Optional) Apply a route template">
+    Click the **Asignar ruta a Usuario** icon (plus icon) to open `/routes/assign-plantilla`. Select a template from the **Selecciona plantilla** dropdown — only templates matching the promoter's region are shown.
+
+    Once a template is selected, its establishments appear in the sidebar. Drag them onto the Monday-to-Friday calendar and click **Asignar Plantilla** to apply.
+  </Step>
+</Steps>
+
+## Editing route order
+
+The **Orden Ruta** column in the main table is editable. Click the edit icon on any row, change the numeric value, and confirm. The page calls `POST /usuarios/updateOrdenRuta` with the promoter's `uid` and the new value. If the update fails, the previous value is restored automatically.
+
+## API reference
+
+| Function | Method | Endpoint | Description |
+|---|---|---|---|
+| `getAllEstablishment` | GET | `/EstablecimientosNuevos/getAllEstablishment` | Fetches all establishments as a fallback when filtering by region is unavailable |
+| `getaUserNewFormat` | POST | `/usuarios/getaUserNewFormat` | Returns the list of promoters assigned to the authenticated user; requires `{ uid }` in the request body |
+
+<Note>
+The user's `uid` is read from `userData` stored in `localStorage` after login. If `userData` is missing or has no `uid`, the Routes page will display an empty list.
+</Note>

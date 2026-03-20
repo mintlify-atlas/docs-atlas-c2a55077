@@ -1,0 +1,103 @@
+---
+title: "Routes"
+description: "Fetch all establishments and retrieve assigned users for route planning."
+---
+
+The routes API supports the route planning module. Functions in `rutas.js` use the `EstablecimientosNuevos/` namespace for establishment lookups and the `usuarios/` namespace for assigned-user lookups.
+
+<Note>
+  All requests require a valid Bearer token. See [Authentication](/api/authentication) for setup instructions.
+</Note>
+
+---
+
+## getAllEstablishment
+
+Fetch all establishment records available for route assignment.
+
+**Method:** `GET`  
+**Path:** `/EstablecimientosNuevos/getAllEstablishment`
+
+### Request
+
+No parameters required.
+
+### Response
+
+Returns the full Axios `response` object. Access the establishment list via `response.data`.
+
+### Example
+
+<CodeGroup>
+
+```javascript getAllEstablishment
+import { getAllEstablishment } from "@/Api/rutas";
+
+const response = await getAllEstablishment();
+console.log(response.data);
+```
+
+```javascript axios equivalent
+import Axios from "axios";
+import settings from "@/Api/enviroment";
+
+const headers = {
+  Authorization: `Bearer ${settings.ACTIVE_TOKEN}`,
+  "Content-Type": "application/json",
+};
+
+const response = await Axios.get(
+  settings.API_URL + "EstablecimientosNuevos/getAllEstablishment",
+  { headers }
+);
+```
+
+</CodeGroup>
+
+---
+
+## getaUserNewFormat
+
+Fetch the list of establishments assigned to a specific user in the new Firestore format.
+
+**Method:** `POST`  
+**Path:** `/usuarios/getaUserNewFormat`
+
+### Request
+
+<ParamField body="uid" type="string" required>
+  The Firebase UID of the user whose assigned establishments should be retrieved.
+</ParamField>
+
+### Response
+
+Returns the full Axios `response` object. Access the assigned establishment records via `response.data`.
+
+### Example
+
+<CodeGroup>
+
+```javascript getaUserNewFormat
+import { getaUserNewFormat } from "@/Api/rutas";
+
+const response = await getaUserNewFormat("user-uid-123");
+console.log(response.data);
+```
+
+```javascript axios equivalent
+import Axios from "axios";
+import settings from "@/Api/enviroment";
+
+const headers = {
+  Authorization: `Bearer ${settings.ACTIVE_TOKEN}`,
+  "Content-Type": "application/json",
+};
+
+const response = await Axios.post(
+  settings.API_URL + "usuarios/getaUserNewFormat",
+  { uid: "user-uid-123" },
+  { headers }
+);
+```
+
+</CodeGroup>

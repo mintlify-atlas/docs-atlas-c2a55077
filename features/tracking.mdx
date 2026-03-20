@@ -1,0 +1,96 @@
+---
+title: "Field tracking"
+description: "Monitor promoter locations and visit activity in real time using the Seguimiento map in Mobility 4"
+---
+
+The **Seguimiento** page (`/seguimiento`) shows you an interactive Google Map of where your field promoters visited on a given day. Each pin on the map represents a form submission from a promoter, with details about which establishment was visited, which form was filled out, and when.
+
+## Search workflow
+
+<Steps>
+  <Step title="Select a client">
+    Choose a client from the **Cliente** dropdown. Available clients are read from the `cliente` array in your `userData` in `localStorage`.
+  </Step>
+
+  <Step title="Select a region">
+    Choose a region from the **Región** dropdown. Available regions are read from the `region` array in your `userData`. The user list below is not populated until both client and region are selected.
+  </Step>
+
+  <Step title="Select a user (optional)">
+    Once you have selected a client and region, the **Usuario** dropdown is enabled and populated by calling `POST /usuarios/getUserClientAndRegion` with the selected client and region.
+
+    - To see all promoters at once, choose **Todos los usuarios** from the top of the list.
+    - To narrow the map to a single person, select their name.
+
+    Leaving the user selector blank and then choosing "Todos los usuarios" after selecting client and region produces the same result as the "all users" option.
+  </Step>
+
+  <Step title="Select a date">
+    Enter or pick a date with the **Fecha** date input. The value is formatted as `YYYY-MM-DD` before being sent to the API.
+  </Step>
+
+  <Step title="Click Search">
+    Click **Buscar**. The page calls `POST /coordenadas/getCoordenadasWithDay` with the following payload:
+
+    ```json
+    {
+      "cliente": "ClienteName",
+      "region": "RegionName",
+      "usuario": "uid-or-Todos los usuarios",
+      "fecha": "YYYY-MM-DD"
+    }
+    ```
+
+    When results are found, the map renders a marker for each coordinate record returned.
+  </Step>
+</Steps>
+
+<Note>
+Client, region, and date are all required before clicking **Buscar**. If any of the three is missing, the search is blocked and a validation toast appears: "Por favor selecciona cliente, región y fecha".
+</Note>
+
+## Map view
+
+The Google Map is centered on latitude `10.47915`, longitude `-66.90618` at zoom level 10. After a successful search each coordinate record is placed as a marker.
+
+Clicking a marker opens an **InfoWindow** that displays:
+
+- **Usuario** — the promoter's name (`promotor` field).
+- **Formularios cargados** — the name of the form submitted at that location (`nombreFormulario`).
+- **Establecimiento** — the name of the store visited (`establecimiento`).
+- **Fecha** — the date and time the form was submitted (`fecha_Formulario`).
+
+## API response shape
+
+The `POST /coordenadas/getCoordenadasWithDay` endpoint returns:
+
+```json
+{
+  "msg": true,
+  "data": [
+    {
+      "coordenadas": "10.4806,-66.9036",
+      "promotor": "Jane Doe",
+      "nombreFormulario": "Retail Audit Q2",
+      "establecimiento": "Farmatodo Las Mercedes",
+      "fecha_Formulario": "2026-03-20"
+    }
+  ]
+}
+```
+
+The `coordenadas` field is a comma-separated `"lat,lng"` string. The page splits it and parses each half as a float before passing it to the map marker.
+
+<Note>
+If `coordenadas` is missing or malformed for a record, that record defaults to `lat: 0, lng: 0` and will appear at the Gulf of Guinea. Ensure your mobile app is capturing GPS coordinates correctly if you see outlier markers at the map origin.
+</Note>
+
+## "Todos los usuarios" option
+
+When you select **Todos los usuarios** from the user dropdown, the `usuario` field in the API request is sent as the literal string `"Todos los usuarios"`. The backend interprets this as a request for all promoters in the given client and region, returning aggregated coordinate data across the entire team for that date.
+
+This is the fastest way to get a full-team view without running one search per promoter.
+
+## Clearing the map
+
+Click **Limpiar** to reset all filter fields, hide the map, and clear the coordinate data from memory. The page returns to the initial prompt state.

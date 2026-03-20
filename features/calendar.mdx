@@ -1,0 +1,66 @@
+---
+title: "Calendar"
+description: "View and manage field operation schedules using the calendar"
+---
+
+The **Calendar** page at `/apps/calendar` provides a visual scheduling interface for field operations. It is built on FullCalendar and supports draggable events, multiple view modes, and a rotating event sidebar that highlights upcoming notable dates.
+
+## Calendar views
+
+<CardGroup cols={3}>
+  <Card title="Month view" icon="calendar">
+    Displays all events across the full month in a grid layout. Use this view for a high-level overview of scheduled field activities and to identify gaps in coverage.
+  </Card>
+  <Card title="Week view" icon="calendar-week">
+    Shows a seven-day timeline for the current week. Useful for reviewing daily workloads and making short-term scheduling adjustments.
+  </Card>
+  <Card title="Day view" icon="calendar-day">
+    Focuses on a single day with a time-slot breakdown. Use this view to review or plan a specific day's visits in detail.
+  </Card>
+</CardGroup>
+
+Switch between views using the view controls in the FullCalendar toolbar at the top of the calendar.
+
+## Event types
+
+The left sidebar lists draggable event templates you can drop onto the calendar:
+
+| Event | Description |
+|---|---|
+| **Meeting Time** | Schedule a team or client meeting |
+| **Holiday** | Mark a regional or national holiday that affects field operations |
+| **Tour Event Planning** | Plan a multi-stop field tour |
+| **Birthday Event** | Log a team member or client birthday |
+| **Lunch Break** | Block time for a midday break |
+
+Drag any event from the sidebar onto a date in the calendar to create a scheduled entry. Enable the **Remove After Drop** checkbox in the sidebar if you want event templates to disappear from the list once placed.
+
+## Adding events
+
+1. Locate the event type you want to schedule in the left sidebar.
+2. Drag it onto the target date on the calendar.
+3. The event appears on the calendar in its assigned color.
+
+You can also click directly on a date cell in the calendar to create a new event.
+
+<Tip>
+Each event type has a distinct color to help you distinguish activity types at a glance — for example, meeting events appear in blue, holidays in green, and tour planning events in yellow.
+</Tip>
+
+## Upcoming events slider
+
+The left panel includes a rotating vertical slider showing pre-configured notable dates. These entries auto-scroll every second and provide context for internationally recognized days that may affect field scheduling:
+
+| Date | Event |
+|---|---|
+| 08 Mar | International Women's Day |
+| 23 Apr | World Book Day |
+| 20 Jun | World Refugee Day |
+| 19 Aug | World Humanitarian Day |
+| 21 Sep | International Day of Peace |
+
+## Filtering by user or region
+
+<Note>
+User and region filtering for calendar events is managed through the broader Mobility 4 access control system. The events visible to you depend on your account's assigned clients and regions, which are set in [Permissions analytics](/features/permissions-analytics).
+</Note>

@@ -1,0 +1,99 @@
+---
+title: "API authentication"
+description: "Authenticate Mobility 4 API requests using Bearer tokens passed in the Authorization header."
+---
+
+Every request to the Mobility 4 API must be authenticated with a Bearer token. Unauthenticated requests will be rejected.
+
+## How authentication works
+
+The client application reads a token from the `VITE_ACTIVE_TOKEN` environment variable and attaches it to every outbound request as an `Authorization` header:
+
+```
+Authorization: Bearer <token>
+```
+
+This token is obtained from Firebase Authentication. After a user signs in through Firebase, the resulting ID token or a pre-issued service token is stored in `VITE_ACTIVE_TOKEN` and injected into all Axios requests at module load time.
+
+## Headers applied to every request
+
+Every API module in the codebase constructs the same headers object:
+
+```javascript
+const headers = {
+  Authorization: `Bearer ${token}`,
+  "Content-Type": "application/json",
+};
+```
+
+These headers are passed in the Axios `config` argument for every `GET`, `POST`, and `PUT` call.
+
+## Configuration
+
+Set your token and API base URL in your `.env` file:
+
+```bash .env
+VITE_API_URL=https://mobility-app.com/api/
+VITE_ACTIVE_TOKEN=your_bearer_token_here
+```
+
+<Note>
+  Never commit your `.env` file to version control. Add it to `.gitignore` to keep your token out of your repository.
+</Note>
+
+## Request examples
+
+<CodeGroup>
+
+```javascript GET request
+import Axios from "axios";
+import settings from "@/Api/enviroment";
+
+const headers = {
+  Authorization: `Bearer ${settings.ACTIVE_TOKEN}`,
+  "Content-Type": "application/json",
+};
+
+const response = await Axios.get(
+  settings.API_URL + "mobility-4/dashboard/indicators",
+  { headers }
+);
+```
+
+```javascript POST request
+import Axios from "axios";
+import settings from "@/Api/enviroment";
+
+const headers = {
+  Authorization: `Bearer ${settings.ACTIVE_TOKEN}`,
+  "Content-Type": "application/json",
+};
+
+const response = await Axios.post(
+  settings.API_URL + "formularios/getFormsWeb",
+  { cliente: "client-id" },
+  { headers }
+);
+```
+
+```javascript PUT request
+import Axios from "axios";
+import settings from "@/Api/enviroment";
+
+const headers = {
+  Authorization: `Bearer ${settings.ACTIVE_TOKEN}`,
+  "Content-Type": "application/json",
+};
+
+const response = await Axios.put(
+  settings.API_URL + "roles/deleteAcces",
+  { id: "role-id" },
+  { headers }
+);
+```
+
+</CodeGroup>
+
+## Error responses
+
+If the token is missing or invalid, the API returns an HTTP `401 Unauthorized` response. Ensure your `VITE_ACTIVE_TOKEN` is set correctly and has not expired.

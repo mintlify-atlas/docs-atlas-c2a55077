@@ -1,0 +1,117 @@
+---
+title: "Orders"
+description: "Generate field operation orders and surveys programmatically."
+---
+
+The orders API provides two functions for generating orders and surveys. Both endpoints are under the `ordenes/` namespace.
+
+<Note>
+  All requests require a valid Bearer token. See [Authentication](/api/authentication) for setup instructions.
+</Note>
+
+---
+
+## generateOrders
+
+Generate a new field operation order.
+
+**Method:** `POST`  
+**Path:** `/ordenes/generateOrden`
+
+### Request
+
+<ParamField body="data" type="object" required>
+  An order object containing the details of the operation to generate. The exact schema depends on your order model.
+</ParamField>
+
+### Response
+
+Returns the full Axios `response` object. Access the created order via `response.data`.
+
+### Example
+
+<CodeGroup>
+
+```javascript generateOrders
+import { generateOrders } from "@/Api/orders";
+
+const response = await generateOrders({
+  client: "client-xyz",
+  region: "North Zone",
+  establishment: "store-001",
+  assignedUser: "user-uid-123",
+  scheduledDate: "2026-03-25",
+});
+console.log(response.data);
+```
+
+```javascript axios equivalent
+import Axios from "axios";
+import settings from "@/Api/enviroment";
+
+const headers = {
+  Authorization: `Bearer ${settings.ACTIVE_TOKEN}`,
+  "Content-Type": "application/json",
+};
+
+const response = await Axios.post(
+  settings.API_URL + "ordenes/generateOrden",
+  { client: "client-xyz", region: "North Zone" },
+  { headers }
+);
+```
+
+</CodeGroup>
+
+---
+
+## generateEncuesta
+
+Generate a survey (encuesta) associated with a field operation.
+
+**Method:** `POST`  
+**Path:** `/ordenes/generateEncuesta`
+
+### Request
+
+<ParamField body="data" type="object" required>
+  A survey object containing the survey configuration and target details. The exact schema depends on your survey model.
+</ParamField>
+
+### Response
+
+Returns the full Axios `response` object. Access the created survey via `response.data`.
+
+### Example
+
+<CodeGroup>
+
+```javascript generateEncuesta
+import { generateEncuesta } from "@/Api/orders";
+
+const response = await generateEncuesta({
+  client: "client-xyz",
+  formId: "form-001",
+  establishment: "store-001",
+  assignedUser: "user-uid-123",
+});
+console.log(response.data);
+```
+
+```javascript axios equivalent
+import Axios from "axios";
+import settings from "@/Api/enviroment";
+
+const headers = {
+  Authorization: `Bearer ${settings.ACTIVE_TOKEN}`,
+  "Content-Type": "application/json",
+};
+
+const response = await Axios.post(
+  settings.API_URL + "ordenes/generateEncuesta",
+  { client: "client-xyz", formId: "form-001" },
+  { headers }
+);
+```
+
+</CodeGroup>

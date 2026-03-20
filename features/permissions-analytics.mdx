@@ -1,0 +1,70 @@
+---
+title: "Permissions analytics"
+description: "Analyze user permission distribution across the platform"
+---
+
+The **Permissions Analytics** page at `/permisosAnalytics` provides a searchable, filterable grid of all users and their analytics access levels. From this page you can edit permissions for individual users or apply the same permission set to multiple users at once.
+
+## The user grid
+
+The main view is a data grid powered by DevExtreme. Each row represents one user. The grid supports inline column filtering, column reordering, and multi-row selection.
+
+<CardGroup cols={2}>
+  <Card title="User identity" icon="id-card">
+    **Cédula**, **Nombre**, and **Apellido** — the user's ID number, first name, and last name.
+  </Card>
+  <Card title="User type" icon="user">
+    **Tipo de Usuario** — the role assigned to the user (e.g., promoter, supervisor, coordinator).
+  </Card>
+  <Card title="Clients and regions" icon="building">
+    **Clientes** — a comma-separated list of clients the user is assigned to. **Región** — a comma-separated list of the user's assigned regions.
+  </Card>
+  <Card title="Account status" icon="circle-check">
+    **Estatus** — displays **Activo** (green) or **Inactivo** (red) based on the `activado` field.
+  </Card>
+</CardGroup>
+
+The total user count appears next to the page title.
+
+## Editing permissions for a user
+
+Click the edit icon (pencil) in the **Acciones** column of any row to open the permissions modal for that user. The modal has a left sidebar with nine permission categories. Click any category to view and toggle its individual permissions.
+
+The nine categories and their permissions are:
+
+| Category | Key permissions |
+|---|---|
+| **Dashboard** | Total PDV, Average rate USD, Total products, Supervisor/promoter count, Category inventory, Top promoters, Top SKU, Monthly/weekly/daily activations, Unreached SKU, Unreached establishments, Participation rate, Incidents count, Main menu, Participation comparison, Participation dashboard |
+| **Grid Principal** | Unreached establishments grid, Unreached SKU grid, Low-traffic SKU, Audit results, Photo records, Regional audit results grid |
+| **Dashboard de Encuestas** | Known brands, Other brands, Total mentions, Preferred brand, Preference reason, Always-available brand, Common behavior, Purchase frequency, Last purchase date, Surveys menu |
+| **Inventario** | Category inventory, Establishment inventory, Inventory comparison, Edit facades, Participation analysis |
+| **Precios** | Price detail, Rate value, Price comparison, Comparative matrix, Price verification, Price analysis, Edit prices, POP detail |
+| **Operaciones** | Users template detail, Synchronizations, Activation count, Operation incidents, Check-in/check-out, Perfect synchronizations, Reports grid, Establishments visited, Active routes, Promoters dashboard, Expiration date |
+| **Inteligencia Artificial** | Inventory category (AI), Participation analysis (AI), Planogram analysis (AI), Schedule analysis (AI), Price analysis (AI), Prompt management (AI) |
+| **Tienda Perfecta** | Perfect store dashboard, Promoting dashboard, Perfect store list |
+| **Reportes** | Individual report toggles loaded dynamically from the `sp_get_reports` stored procedure. Each report listed in the system appears as a checkbox. |
+
+<Tip>
+Each category has a **Seleccionar todos** checkbox at the top to enable or disable all permissions in that section at once.
+</Tip>
+
+Click **Guardar Permisos** to save. The platform calls the permissions update API and, for the **Reportes** category, also saves the selected report IDs via `POST /analytics/saveReportsUsers`.
+
+## Bulk permissions (permisos masivos)
+
+To apply the same permissions to multiple users at once:
+
+1. Select two or more users in the grid by checking their row checkboxes.
+2. Click the **Permisos masivos (N)** button that appears in the header, where N is the number of selected users.
+3. In the bulk permissions modal, configure the desired permissions across the eight categories (note: the **Reportes** tab is not available in bulk mode).
+4. Click **Aplicar a N usuario(s)**.
+
+The platform processes users sequentially, showing a live counter (e.g., **Actualizando 3 / 10...**). After completion, a toast notification reports how many users were updated successfully and how many failed.
+
+<Warning>
+Bulk permissions overwrite the existing permissions for all selected users with the values you configure in the modal. Users whose permissions should remain unchanged should not be selected.
+</Warning>
+
+## Pagination
+
+The grid defaults to 12 rows per page. You can change the page size to 5, 10, 15, 20, or 50 rows using the page size selector below the grid.

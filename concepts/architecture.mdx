@@ -1,0 +1,91 @@
+---
+title: "Architecture"
+description: "Technical architecture of the Mobility 4 platform."
+---
+
+Mobility 4 is a React single-page application (SPA) built with Vite. It connects to a REST API backend for business data and uses Firebase for identity management.
+
+## Tech stack
+
+<CardGroup cols={2}>
+  <Card title="React + Vite" icon="react">
+    The UI is a React SPA bundled with Vite. Pages use lazy loading via `React.lazy` and `Suspense` for fast initial load times.
+  </Card>
+  <Card title="Redux Toolkit" icon="database">
+    Application state is managed with Redux Toolkit. The `user` slice is persisted to `localStorage` via `redux-persist`, keeping sessions alive across page refreshes.
+  </Card>
+  <Card title="React Router v6" icon="route">
+    Client-side routing is handled by React Router v6 using `useRoutes`. All routes are defined in `src/Route/index.jsx` and organized into auth, app, and error route groups.
+  </Card>
+  <Card title="Axios" icon="arrow-right-arrow-left">
+    All HTTP requests to the REST backend use Axios. Every module (Roles, Users, Clients, etc.) imports a shared `settings` object from `src/Api/enviroment.js` that supplies `API_URL` and `ACTIVE_TOKEN`.
+  </Card>
+  <Card title="Firebase" icon="fire">
+    Firebase handles user authentication (`firebase/auth`) and stores user records in Firestore (`firebase/firestore`). File uploads use Firebase Storage (`firebase/storage`).
+  </Card>
+  <Card title="REST API backend" icon="server">
+    The Mobility 4 backend is a REST API hosted at `https://mobility-app.com/api/`. All requests include a static Bearer token set via `VITE_ACTIVE_TOKEN`.
+  </Card>
+</CardGroup>
+
+## Module structure
+
+The `src/` directory is organized into the following top-level modules:
+
+| Module | Purpose |
+|---|---|
+| `Pages/` | Page-level React components, grouped by feature (Apps, AuthPages, Dashboard, ErrorPages, Icon) |
+| `Components/` | Shared, reusable UI components |
+| `Api/` | Axios API call modules, one file per resource (Roles, Users, Clients, Seguimiento, etc.) |
+| `Route/` | Route definitions (`index.jsx`) and route constant maps (`AuthRoutes.jsx`) |
+| `redux/` | Redux store configuration (`store.js`) and state slices (`slices/userSlice.js`) |
+| `Config/` | Firebase initialization (`FirebaseConfig.js`) |
+| `Layout/` | Top-level layout shell that wraps all authenticated pages |
+| `Services/` | Business logic and utility services |
+
+## Data flow
+
+Every user-initiated action follows this path through the stack:
+
+<Steps>
+  <Step title="User action">
+    The user interacts with a React component — for example, selecting a client filter on the **Seguimiento** page or submitting a form.
+  </Step>
+
+  <Step title="Redux slice dispatch">
+    If the action affects shared state (such as login), a Redux action is dispatched to the appropriate slice. The `user` slice in `src/redux/slices/userSlice.js` manages authentication state (`loginSuccess`, `logout`).
+  </Step>
+
+  <Step title="Axios API call">
+    The component or a service calls the relevant function from `src/Api/`. For example, `getRoles()` in `src/Api/Roles.js` sends a `GET` request to `https://mobility-app.com/api/roles/getRoles` with the Bearer token in the `Authorization` header.
+  </Step>
+
+  <Step title="REST backend">
+    The Mobility 4 REST backend at `https://mobility-app.com/api/` processes the request, reads or writes data, and returns a JSON response.
+  </Step>
+
+  <Step title="Firebase data">
+    For user identity and profile data, Firebase Firestore is queried directly from the frontend. The `Usuarios` collection stores user records including email, cédula, assigned clients, and regions.
+  </Step>
+
+  <Step title="UI update">
+    The Axios promise resolves, the component updates its local state (or dispatches to Redux), and React re-renders the affected UI.
+  </Step>
+</Steps>
+
+## Routing structure
+
+Routes are split into four groups defined in `src/Route/AuthRoutes.jsx` and assembled in `src/Route/index.jsx`:
+
+| Group | Example paths |
+|---|---|
+| `DashboardRoutes` | `/`, `/dashboard/ecommerce` |
+| `AppsRoutes` | `/User`, `/roles`, `/seguimiento`, `/regiones`, `/clientes`, `/establecimientosNuevos` |
+| `AuthRoutes` | `/auth/sign-in`, `/auth/sign-up`, `/auth/password-reset` |
+| `ErrorRoutes` | `/error/400`, `/error/403`, `/error/404`, `/error/500`, `/error/503` |
+
+All authenticated routes are rendered inside the `<Layout>` component, which provides the sidebar, navbar, and global page shell. Auth and error routes render without the layout wrapper.
+
+<Note>
+  Unknown routes that match a path in the user's menu are redirected to `/User` by the `RedirectToUsers` catch-all component. True 404 errors render the `/error/404` page.
+</Note>

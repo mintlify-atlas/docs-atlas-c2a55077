@@ -1,0 +1,151 @@
+---
+title: "Regions"
+description: "Manage geographic regions: list all regions, create or update a region, and soft-delete a region by ID."
+---
+
+The regions API lets you manage geographic regions used to organize field operations. All endpoints are under the `regiones/` namespace. Requests include a 30-second timeout for read operations and a 60-second timeout for write operations.
+
+<Note>
+  All requests require a valid Bearer token. See [Authentication](/api/authentication) for setup instructions.
+</Note>
+
+---
+
+## getRegion
+
+Fetch all regions.
+
+**Method:** `GET`  
+**Path:** `/regiones/getRegion`
+
+This request has a 30-second timeout.
+
+### Request
+
+No parameters required.
+
+### Response
+
+Returns the full Axios `response` object. Access the region list via `response.data`.
+
+### Example
+
+<CodeGroup>
+
+```javascript getRegion
+import { getRegion } from "@/Api/Regiones";
+
+const response = await getRegion();
+console.log(response.data);
+```
+
+```javascript axios equivalent
+import Axios from "axios";
+import settings from "@/Api/enviroment";
+
+const headers = {
+  Authorization: `Bearer ${settings.ACTIVE_TOKEN}`,
+  "Content-Type": "application/json",
+};
+
+const response = await Axios.get(
+  settings.API_URL + "regiones/getRegion",
+  { headers, timeout: 30000 }
+);
+```
+
+</CodeGroup>
+
+---
+
+## createUpdateRegiones
+
+Create a new region or update an existing one. The server determines whether to insert or update based on the contents of `data`. This request has a 60-second timeout.
+
+**Method:** `POST`  
+**Path:** `/regiones/createUpdateRegiones`
+
+### Request
+
+<ParamField body="data" type="object" required>
+  A region object. Include an `id` field to update an existing region; omit it to create a new one.
+</ParamField>
+
+### Response
+
+Returns the full Axios `response` object.
+
+### Example
+
+<CodeGroup>
+
+```javascript create a region
+import { createUpdateRegiones } from "@/Api/Regiones";
+
+const response = await createUpdateRegiones({
+  name: "North Zone",
+  description: "Northern distribution area",
+});
+```
+
+```javascript update a region
+import { createUpdateRegiones } from "@/Api/Regiones";
+
+const response = await createUpdateRegiones({
+  id: "region-001",
+  name: "North Zone A",
+});
+```
+
+</CodeGroup>
+
+---
+
+## deleteRegions
+
+Soft-delete a region by ID.
+
+**Method:** `PUT`  
+**Path:** `/regiones/deleteRegions`
+
+<Note>
+  This endpoint uses `PUT`, not `DELETE`. The region is soft-deleted rather than permanently removed. The request has a 30-second timeout.
+</Note>
+
+### Request
+
+<ParamField body="id" type="string" required>
+  The unique identifier of the region to delete.
+</ParamField>
+
+### Response
+
+Returns the full Axios `response` object.
+
+### Example
+
+<CodeGroup>
+
+```javascript deleteRegions
+import { deleteRegions } from "@/Api/Regiones";
+
+const response = await deleteRegions("region-001");
+```
+
+```javascript axios equivalent
+import Axios from "axios";
+import settings from "@/Api/enviroment";
+
+const headers = {
+  Authorization: `Bearer ${settings.ACTIVE_TOKEN}`,
+  "Content-Type": "application/json",
+};
+
+const response = await Axios.put(
+  settings.API_URL + "regiones/deleteRegions",
+  { id: "region-001" },
+  { headers, timeout: 30000 }
+);
+```
+
+</CodeGroup>

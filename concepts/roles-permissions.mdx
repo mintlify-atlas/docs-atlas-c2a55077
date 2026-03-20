@@ -1,0 +1,103 @@
+---
+title: "Roles & permissions"
+description: "How role-based access control works in Mobility 4."
+---
+
+Mobility 4 uses a role-based access control (RBAC) system to determine which pages and menu items each user can access. Roles are created and managed through the REST API and are applied per user.
+
+## How roles work
+
+Each role defines a set of permitted modules (pages). When a user signs in, their role is loaded and controls which sidebar items are visible and which routes are accessible. Attempting to navigate to a route outside your role's permissions redirects you to the **Users** page (`/User`).
+
+The **Roles** page is accessible at `/roles`. The **Permissions Analytics** page at `/permisosAnalytics` lets administrators audit which roles have access to which modules.
+
+## Roles API
+
+Roles are managed through the `/roles/` endpoint group. All requests use the `VITE_ACTIVE_TOKEN` Bearer token.
+
+```js src/Api/Roles.js
+import settings from "./enviroment";
+import Axios from "axios";
+
+const url = settings.API_URL + "roles/";
+const headers = {
+  Authorization: `Bearer ${settings.ACTIVE_TOKEN}`,
+  "Content-Type": "application/json",
+};
+
+// Fetch all roles
+export const getRoles = () =>
+  Axios.get(url + "getRoles", { headers });
+
+// Create or update a role
+export const createUpdateRoles = (data) =>
+  Axios.post(url + "createUpdateRoles", data, { headers });
+
+// Delete (deactivate) a role by ID
+export const deleteAcces = (id) =>
+  Axios.put(url + "deleteAcces", { id }, { headers });
+```
+
+| Function | Method | Endpoint | Purpose |
+|---|---|---|---|
+| `getRoles` | `GET` | `/roles/getRoles` | Fetch all defined roles |
+| `createUpdateRoles` | `POST` | `/roles/createUpdateRoles` | Create a new role or update an existing one |
+| `deleteAcces` | `PUT` | `/roles/deleteAcces` | Deactivate a role by its ID |
+
+<Warning>
+  `deleteAcces` uses a `PUT` request, not `DELETE`. Passing the wrong `id` will deactivate the wrong role. Verify the role ID before calling this function.
+</Warning>
+
+## Role types
+
+<AccordionGroup>
+  <Accordion title="Admin">
+    Admins have full access to all modules in the platform. This includes:
+
+    - **User management** — create, edit, and deactivate users (`/User`, `/UserCoord`)
+    - **Role management** — create and assign roles (`/roles`)
+    - **Client and region configuration** — manage clients (`/clientes`) and regions (`/regiones`)
+    - **Establishment management** — create and manage establishments (`/establecimientosNuevos`)
+    - **Route planning** — assign establishments and users to routes (`/AsignNewestablishments`, `/AsignacionUsuarios`)
+    - **Reports** — access all reports and download exports (`/reportes`, `/reportspost`)
+    - **Permissions analytics** — view role-access audit data (`/permisosAnalytics`)
+    - **SKU configuration** — define product SKUs (`/configuracionSku`)
+    - **All field operation modules** — tracking, forms, surveys, inventory, purchase orders, and dotación
+  </Accordion>
+
+  <Accordion title="Supervisor">
+    Supervisors oversee field teams within their assigned clients and regions. Typical access includes:
+
+    - **Field tracking** — monitor promoter GPS activity (`/seguimiento`)
+    - **Supervisions** — review field visit records (`/supervisiones`)
+    - **User list** — view users in their scope (`/UserCoord`)
+    - **Reports** — access operational reports (`/reportes`)
+    - **Forms** — view submitted forms and form templates (`/formularios`)
+    - **Photographic register** — review photographic evidence from field visits (`/registroFotografico`)
+    - **Inventory** — view inventory totals (`/totalinventario`)
+
+    Supervisors cannot create or modify users, roles, clients, or regions.
+  </Accordion>
+
+  <Accordion title="Promoter">
+    Promoters are field workers who execute daily routes and report activity. Typical access includes:
+
+    - **Activation** — check in at establishments (`/activacion`)
+    - **Forms** — complete visit forms and attendance forms (`/formularios`, `/apps/formAsistencia`)
+    - **Surveys** — respond to field surveys (`/encuestas`)
+    - **Inventory** — record inventory movements (`/totalinventario`)
+    - **Purchase orders** — submit purchase orders (`/ordenesCompra`)
+    - **Dotación** — view equipment and supply allocations (`/dotaciones`)
+    - **Profile and settings** — manage their own profile (`/apps/profile-page/profile`)
+
+    Promoters have read-only or submit-only access. They cannot view other users' data, modify roles, or access configuration pages.
+  </Accordion>
+</AccordionGroup>
+
+## Assigning roles to users
+
+When creating or editing a user on the **Users** page (`/User`), the **Módulos** step of the creation wizard lets you assign a role. The assigned role determines which sidebar items and routes are available to that user immediately upon their next sign-in.
+
+<Note>
+  Role changes take effect on the user's next session. If a user is currently signed in when their role is updated, they need to sign out and sign back in for the new permissions to apply.
+</Note>

@@ -1,0 +1,292 @@
+---
+title: "Inventory"
+description: "Manage inventory records: list, save, transfer, and track movements. Includes lookups for clients, users, forms, regions, and promoter users."
+---
+
+The inventory API covers all inventory management operations. Functions in `inventory.js` use the `inventario/`, `clientes/`, `usuarios/`, `formularios/`, and `regiones/` namespaces.
+
+<Note>
+  All requests require a valid Bearer token. See [Authentication](/api/authentication) for setup instructions.
+</Note>
+
+---
+
+## getClients
+
+Fetch all clients. Used to populate client filter dropdowns in the inventory UI.
+
+**Method:** `GET`  
+**Path:** `/clientes/getClients`
+
+### Request
+
+No parameters required.
+
+### Response
+
+Returns the full Axios `response` object. Access records via `response.data`.
+
+### Example
+
+<CodeGroup>
+
+```javascript getClients
+import { getClients } from "@/Api/inventory";
+
+const response = await getClients();
+console.log(response.data);
+```
+
+</CodeGroup>
+
+---
+
+## getUsers
+
+Fetch all user records.
+
+**Method:** `GET`  
+**Path:** `/usuarios/getDataUser`
+
+### Request
+
+No parameters required.
+
+### Response
+
+Returns the full Axios `response` object. Access records via `response.data`.
+
+### Example
+
+<CodeGroup>
+
+```javascript getUsers
+import { getUsers } from "@/Api/inventory";
+
+const response = await getUsers();
+console.log(response.data);
+```
+
+</CodeGroup>
+
+---
+
+## getForms
+
+Fetch all forms associated with a specific client.
+
+**Method:** `POST`  
+**Path:** `/formularios/getFormsWeb`
+
+### Request
+
+<ParamField body="cliente" type="string" required>
+  The client identifier used to filter forms.
+</ParamField>
+
+### Response
+
+Returns the full Axios `response` object. Access records via `response.data`.
+
+### Example
+
+<CodeGroup>
+
+```javascript getForms
+import { getForms } from "@/Api/inventory";
+
+const response = await getForms("client-xyz");
+console.log(response.data);
+```
+
+</CodeGroup>
+
+---
+
+## getRegion
+
+Fetch all regions.
+
+**Method:** `GET`  
+**Path:** `/regiones/getRegion`
+
+### Request
+
+No parameters required.
+
+### Response
+
+Returns `response.data` — an array of region objects.
+
+### Example
+
+<CodeGroup>
+
+```javascript getRegion
+import { getRegion } from "@/Api/inventory";
+
+const regions = await getRegion();
+console.log(regions);
+```
+
+</CodeGroup>
+
+---
+
+## getUsuariosPromotores
+
+Fetch all promoter users (field promoters who handle inventory).
+
+**Method:** `GET`  
+**Path:** `/inventario/getUsuariosPromotores`
+
+### Request
+
+No parameters required.
+
+### Response
+
+Returns `response.data` — an array of promoter user objects.
+
+### Example
+
+<CodeGroup>
+
+```javascript getUsuariosPromotores
+import { getUsuariosPromotores } from "@/Api/inventory";
+
+const promoters = await getUsuariosPromotores();
+console.log(promoters);
+```
+
+</CodeGroup>
+
+---
+
+## getInventario
+
+Fetch all inventory records.
+
+**Method:** `GET`  
+**Path:** `/inventario/getInventario`
+
+### Request
+
+No parameters required.
+
+### Response
+
+Returns the full Axios `response` object. Access inventory records via `response.data`.
+
+### Example
+
+<CodeGroup>
+
+```javascript getInventario
+import { getInventario } from "@/Api/inventory";
+
+const response = await getInventario();
+console.log(response.data);
+```
+
+</CodeGroup>
+
+---
+
+## transferInventario
+
+Transfer inventory between users or locations.
+
+**Method:** `POST`  
+**Path:** `/inventario/transferInventario`
+
+### Request
+
+<ParamField body="data" type="object" required>
+  A transfer object describing the source, destination, items, and quantities to move. The exact schema is defined by your inventory model.
+</ParamField>
+
+### Response
+
+Returns the full Axios `response` object.
+
+### Example
+
+<CodeGroup>
+
+```javascript transferInventario
+import { transferInventario } from "@/Api/inventory";
+
+const response = await transferInventario({
+  from: "user-uid-123",
+  to: "user-uid-456",
+  items: [{ sku: "PROD-001", qty: 10 }],
+});
+```
+
+</CodeGroup>
+
+---
+
+## getMovInventario
+
+Fetch all inventory movement records.
+
+**Method:** `GET`  
+**Path:** `/inventario/getMovInventario`
+
+### Request
+
+No parameters required.
+
+### Response
+
+Returns the full Axios `response` object. Access movement records via `response.data`.
+
+### Example
+
+<CodeGroup>
+
+```javascript getMovInventario
+import { getMovInventario } from "@/Api/inventory";
+
+const response = await getMovInventario();
+console.log(response.data);
+```
+
+</CodeGroup>
+
+---
+
+## saveInventario
+
+Persist an inventory snapshot or update.
+
+**Method:** `POST`  
+**Path:** `/inventario/saveInventario`
+
+### Request
+
+<ParamField body="data" type="object" required>
+  An inventory object to save. The exact schema depends on your inventory model.
+</ParamField>
+
+### Response
+
+Returns the full Axios `response` object.
+
+### Example
+
+<CodeGroup>
+
+```javascript saveInventario
+import { saveInventario } from "@/Api/inventory";
+
+const response = await saveInventario({
+  user: "user-uid-123",
+  items: [{ sku: "PROD-001", qty: 50 }],
+  date: "2026-03-20",
+});
+```
+
+</CodeGroup>

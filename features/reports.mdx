@@ -1,0 +1,70 @@
+---
+title: "Reports"
+description: "View and analyze field operation reports in Mobility 4"
+---
+
+The **Reports** page at `/reportes` lets you query, filter, and export data collected by field agents across your client portfolio. You select the client, form type, region, and date range, then generate a downloadable file containing the matching records.
+
+## Report types
+
+<CardGroup cols={3}>
+  <Card title="Fundamental" icon="chart-bar">
+    Core field visit data covering product presence, placement, and stock observations. For the Fundamental form type, the platform automatically splits results into two files: **Fundamental** (all non-price responses) and **Precios** (price observations with currency metadata).
+  </Card>
+  <Card title="Form reports" icon="file-lines">
+    Data captured from any custom form configured for the selected client. Each form maps to a named report — choose the form from the **Formulario** dropdown after selecting a client.
+  </Card>
+  <Card title="Synchronization" icon="rotate">
+    Aggregated synchronization records showing which establishments each promoter synced on a given day, including `region`, `usuario`, `razon_social`, `canal`, `ciudad`, `cod_est`, and `establecimiento`.
+  </Card>
+</CardGroup>
+
+## Filtering a report
+
+The report form has five fields:
+
+| Field | Description |
+|---|---|
+| **Cliente** | The client whose data you want to query. Selecting a client loads the available forms for that client. |
+| **Formulario** | The form name to filter results by. Options populate automatically after you select a client. |
+| **Región** | A specific region to narrow results, or **TODAS LAS REGIONES** to include all regions. |
+| **Desde** | Start date of the report range (defaults to 7 days ago). |
+| **Hasta** | End date of the report range (defaults to today). |
+
+<Note>
+The **Formulario** dropdown is empty until you select a **Cliente**. The platform fetches available forms from `POST /formularios/getFormsWeb` using the selected client name.
+</Note>
+
+## Generating a report
+
+1. Select a **Cliente** from the dropdown. The platform loads that client's available forms.
+2. Select a **Formulario**.
+3. Select a **Región**, or leave it set to **TODAS LAS REGIONES**.
+4. Set the **Desde** and **Hasta** dates.
+5. Click **Generar reporte**.
+
+The platform calls `POST /analytics/generateReportAnalytics/generateReport` with the selected parameters. If records exist for the date range, a CSV file downloads automatically.
+
+<Warning>
+If no records exist for the selected filters and date range, the platform shows a warning: "No se encontraron registros en la fecha dada." Try widening the date range or selecting a different region.
+</Warning>
+
+## Fundamental form behavior
+
+When you select a Fundamental-type form (any variation of `Fundamental`, `Fundamentales`, or `FUNDAMENTAL`), the platform splits the results into two separate download files:
+
+- **Fundamental** — all responses where `pregunta` is not a price field
+- **Precios** — responses where `pregunta` is `PRECIO`, `BOLIVARES`, or `DOLARES`, normalized to a single `PRECIO` column with a `moneda` field (`BS` or `$`)
+
+Both files download in sequence automatically.
+
+## Data columns
+
+Standard report files include the following columns:
+
+```text
+formulario, fecha_Formulario, fecha_Sincronizado, region, usuario,
+razon_social, canal, ciudad, cod_est, establecimiento, categoria,
+subcategoria, marcaProducto, codigo, producto, pregunta, respuesta,
+moneda, tasa
+```

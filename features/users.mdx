@@ -1,0 +1,90 @@
+---
+title: "User management"
+description: "Create and manage platform users in Mobility 4, including assigning clients, regions, modules, and route configurations."
+---
+
+The **Users** page lets you view, create, edit, and pre-register platform users. Each user is associated with one or more `cliente` (client) and `region` values that scope their access to field data.
+
+**Route:** `/User`
+
+## User list
+
+When you open the **Users** page, the data grid loads all users from the platform. Each row displays:
+
+| Column | Description |
+|---|---|
+| **Cédula** | National ID number (7–8 digits) |
+| **Nombre** | First name |
+| **Apellido** | Last name |
+| **Perfil** | Assigned role (hidden by default; show via column chooser) |
+| **Región** | One or more regions assigned to the user |
+| **Cliente** | One or more clients assigned to the user |
+| **Estatus** | Active or inactive status badge |
+| **Acciones** | Edit button to open the user form |
+
+You can filter by any column using the inline filter row, sort by clicking column headers, and reorder or hide columns with the column chooser. Use the **download** button in the toolbar to export the current filtered view to an `.xlsx` file. Use the **refresh** button to reload the user list from the API.
+
+<Note>
+  The `region` and `cliente` fields are stored as arrays. A user can belong to multiple regions and clients simultaneously.
+</Note>
+
+## Creating a user
+
+Click **Crear nuevo Usuario** to open the multi-step user creation form. The form has six steps you can navigate between at any time using the sidebar.
+
+<Steps>
+  <Step title="Datos personales">
+    Enter the user's **Nombre**, **Apellido**, nationality prefix (**V**, **E**, or **J**), **Cédula de identidad** (7–8 digits), and **Email**. All fields are required. The email must use a real domain — generic domains like `test.com` or `example.com` are rejected.
+  </Step>
+  <Step title="Seguridad">
+    Set a **password** for the account and configure the user's **estado** (active/inactive) and **superAdmin** flag. When editing an existing user, you can leave the password field blank to keep the current password.
+  </Step>
+  <Step title="Módulos">
+    Select the navigation modules this user can access. Each module maps to a route path in the platform. The selection here populates the user's `menu` array and determines which sidebar items they see after logging in.
+  </Step>
+  <Step title="Regiones">
+    Assign one or more regions to the user. These regions scope the field data — routes, establishments, and reports — visible to this user.
+  </Step>
+  <Step title="Clientes">
+    Assign one or more clients to the user. Combined with the region assignment, this determines the full data scope for the user's operations.
+  </Step>
+  <Step title="Ruta (Configuración)">
+    Set the **paginaInicio** (landing page after login), the **replace** substitution user, and the **ordenRuta** (route ordering value). The starting page must match one of the modules selected in step 3.
+  </Step>
+</Steps>
+
+Click **Guardar** on any step to save the full form. The platform calls `createUpdateUser` which submits the complete user object to the backend API.
+
+<Warning>
+  The `paginaInicio` value must exactly match one of the module paths selected in the **Módulos** step. If it does not match, the form will show an error and the user will not be saved.
+</Warning>
+
+## Editing a user
+
+Click the edit (pencil) button in the **Acciones** column to open the same multi-step form pre-filled with the user's existing data. The platform fetches the full user record by key before opening the modal. Passwords are never pre-loaded — leave the password field blank to keep the current password.
+
+## Pre-registering a user
+
+Click **Pre-registrar Usuario** to open the pre-registration flow. This creates a user record with the status `Pre-Registrado` before a full account is activated. The pre-registration wizard has three steps:
+
+<Steps>
+  <Step title="Datos personales">
+    Enter the user's **Nombre**, **Apellido**, and **Cédula de identidad** (nationality prefix + 7–8 digit number).
+  </Step>
+  <Step title="Cliente y Región">
+    Select the **Cliente** and **Región** from the lists scoped to the currently logged-in administrator's own client and region assignments. Choose a **Perfil** (role) and set the **Fecha de inicio** (start date). All fields on this step are required.
+  </Step>
+  <Step title="Asignación">
+    Optionally assign establishments to the user's route. You can load a **plantilla de ruta** (route template) filtered by the selected region and pick specific establishments from it. The template's `orden_ruta` value is applied automatically.
+  </Step>
+</Steps>
+
+Submitting the pre-registration form posts to `POST /Pre-Register` with the full pre-registration payload including the assigned client, region, profile, establishments, and route order.
+
+## Coordinate user list
+
+The **UserCoord** page at `/UserCoord` displays the same user data grid as `/User` with the same columns, filtering, sorting, and export capabilities. It is intended for operations where users need to be viewed or managed in a coordinate-scoped context.
+
+## Assigning users
+
+The **AsignarUser** flow at `/AsignacionUsuarios` handles user assignment operations — linking users to supervisors, routes, or establishments outside of the main user creation flow.

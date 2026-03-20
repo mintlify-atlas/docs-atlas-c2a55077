@@ -1,0 +1,83 @@
+---
+title: "Regions & clients"
+description: "Understanding the client-region-establishment hierarchy in Mobility 4."
+---
+
+Mobility 4 organizes all field operations around a five-level hierarchy. Every piece of data — from a GPS coordinate to a purchase order — is anchored to a specific position in this hierarchy.
+
+## Data hierarchy
+
+<Steps>
+  <Step title="Client">
+    A **Client** is the top-level entity. It represents the company or brand whose products are being promoted or distributed in the field. Clients are managed on the **Clientes** page (`/clientes`).
+
+    A single Mobility 4 installation can serve multiple clients simultaneously. Each user is assigned to one or more clients, and all filters and reports are scoped to the user's permitted clients.
+  </Step>
+
+  <Step title="Region">
+    A **Region** groups geographic areas under a client. For example, a client might have regions for different cities, territories, or sales zones. Regions are managed on the **Regiones** page (`/regiones`).
+
+    Each user is assigned to one or more regions. Only establishments and routes within the user's assigned regions are visible to them.
+  </Step>
+
+  <Step title="Establishment">
+    An **Establishment** is a physical point of sale or store that field workers visit. Establishments belong to a region and are managed on the **Establishments** page (`/establecimientosNuevos`).
+
+    Establishments are the primary unit of field activity — check-ins, form submissions, inventory counts, and photographic registers are all linked to a specific establishment.
+  </Step>
+
+  <Step title="Route">
+    A **Route** is an ordered collection of establishments that a promoter visits in a single day. Routes are built on the **Routes** page (`/AsignNewestablishments`) and can be built from templates on the **Template Routes** page (`/plantillaRutas`).
+
+    Each route is linked to a specific region and can be assigned to one or more users.
+  </Step>
+
+  <Step title="User">
+    A **User** (promoter, supervisor, or administrator) is assigned to one or more clients, regions, and routes. The user's assignments determine the data they can see and interact with across the entire platform.
+
+    Users are created and managed on the **Users** page (`/User`). Route-to-user assignments are managed on the **User Assignment** page (`/AsignacionUsuarios`).
+  </Step>
+</Steps>
+
+## User data in localStorage
+
+When a user signs in, their full Firestore record is saved to `localStorage` under the key `userData`. This record includes `cliente` and `region` arrays that list the names of every client and region the user is permitted to access.
+
+```json userData (example)
+{
+  "nombre": "Ana García",
+  "email": "ana.garcia@example.com",
+  "cedula": 12345678,
+  "cliente": ["Marca A", "Marca B"],
+  "region": ["Norte", "Centro", "Sur"],
+  "rol": "supervisor"
+}
+```
+
+Pages that need client and region filters read directly from this `localStorage` value — no additional API call is needed to populate the dropdowns.
+
+## How filters use the hierarchy
+
+The **Seguimiento** (field tracking) page at `/seguimiento` is a good example of how the hierarchy drives filtering:
+
+1. On page load, the component reads `userData` from `localStorage` and extracts the `cliente` and `region` arrays.
+2. The **Client** dropdown is populated with the user's permitted clients.
+3. The **Region** dropdown is populated with the user's permitted regions.
+4. When you select both a client and a region, Mobility 4 fetches the list of users active in that combination from the API (`getUserClientAndRegion`).
+5. You then select a specific user (or **Todos los usuarios** for all) and a date to load GPS coordinates on the map.
+
+This pattern — scoping available data to the signed-in user's assigned clients and regions — applies across reports, inventory, forms, and supervisions.
+
+## Managing the hierarchy
+
+| Entity | Management page | Route |
+|---|---|---|
+| Clients | **Clientes** | `/clientes` |
+| Regions | **Regiones** | `/regiones` |
+| Establishments | **Establishments** | `/establecimientosNuevos` |
+| Routes | **Routes** | `/AsignNewestablishments` |
+| User assignments | **User Assignment** | `/AsignacionUsuarios` |
+
+<Note>
+  Only users with Admin-level roles can create and modify clients, regions, and establishments. Supervisors and promoters have read-only visibility scoped to their own assignments.
+</Note>

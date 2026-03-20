@@ -1,0 +1,103 @@
+---
+title: "Dotacion"
+description: "Manage equipment and supply allocation (dotacion) for field workers"
+---
+
+**Dotacion** (allocation) is the process of assigning equipment, uniforms, and supplies to field promoters and supervisors. The Dotacion module records every inventory movement — both inbound stock entries (**Entrada**) and outbound allocations to personnel (**Dotacion**) — and displays a full audit log of all movements.
+
+## Route
+
+| Route | Purpose |
+|---|---|
+| `/dotaciones` | View movement history and create new inventory movements |
+
+## Key concepts
+
+<CardGroup cols={2}>
+  <Card title="Entrada (stock entry)" icon="arrow-down">
+    Records new stock arriving into the system. Requires a supplier invoice number, unit price, quantity, and total cost. Used when uniforms or supplies are purchased and received.
+  </Card>
+  <Card title="Dotacion (allocation)" icon="arrow-up">
+    Records equipment or supplies being issued to a specific field worker (beneficiado). Requires a client account to charge (cuenta a dotar) and the beneficiary's details.
+  </Card>
+  <Card title="Responsable" icon="user">
+    Every movement must have a responsible person — a Supervisor or Coordinator assigned to the selected region. Their ID number (cédula) is auto-filled when you select them.
+  </Card>
+  <Card title="Beneficiado" icon="user-check">
+    For Dotacion movements, a beneficiary (Promotor, Supervisor, or Transferencista) must be named. The beneficiary must be assigned to the same region and client account.
+  </Card>
+</CardGroup>
+
+## Viewing movement history
+
+Navigate to `/dotaciones`. The page loads all inventory movements via `GET /inventario/getMovInventario` on mount.
+
+The data grid shows the following columns:
+
+| Column | Description |
+|---|---|
+| **# Orden** | Sequential order number for the movement |
+| **Tipo de Movimiento** | `entrada` or `dotacion` |
+| **Nro. Factura** | Supplier invoice number (entries only) |
+| **Cantidad** | Number of units moved |
+| **Empresa** | Company that owns the stock |
+| **Region** | Region where the movement occurred |
+| **Cuenta a Dotar** | Client account charged (dotacion only) |
+| **Responsable** | Name of the responsible Supervisor or Coordinator |
+| **Cedula Responsable** | ID number of the responsible person |
+
+## Creating a new movement
+
+Click **Nuevo Movimiento** to open the movement form. The order number is pre-filled as the next sequential number.
+
+<Steps>
+  <Step title="Select movement type">
+    Choose **Entrada** or **Dotacion** from the **Tipo de Movimiento** selector. The form fields shown differ depending on your choice:
+    - **Entrada** shows: **Número de Factura**, **Monto Unitario**, **Cantidad**, and **Total** (auto-calculated).
+    - **Dotacion** shows: **Cuenta a dotar**, **Beneficiado**, **Cédula Beneficiado**, and **Cantidad**.
+  </Step>
+  <Step title="Set the order number">
+    The **Número de Orden** field is pre-populated with the next order number. You can modify it if needed.
+  </Step>
+  <Step title="Select the company">
+    Choose an **Empresa** from the dropdown. The available companies are:
+    - CONSORCIO PROMOTING C.A.
+    - WORKFORCE
+    - TRADE BRANDING
+  </Step>
+  <Step title="Select the region">
+    Choose a **Región**. This filters the **Responsable** list to show only Supervisors and Coordinators in that region.
+  </Step>
+  <Step title="For Dotacion: select the account to charge">
+    If the movement type is **Dotacion**, select a **Cuenta a dotar** (client account). This further filters the **Beneficiado** list to users assigned to that client and region.
+  </Step>
+  <Step title="Assign a responsible person">
+    Select a **Responsable** from the dropdown. The **Cédula Responsable** is auto-filled from the selected user's profile.
+  </Step>
+  <Step title="For Dotacion: select the beneficiary">
+    If the movement type is **Dotacion**, select the **Beneficiado** (the field worker receiving the allocation). The **Cédula Beneficiado** is auto-filled.
+  </Step>
+  <Step title="Select article type and article">
+    Choose a **Tipo de artículo**:
+    - **Uniformes**: Camisa Dama (XS–XL), Camisa Caballero (XS–XL)
+    - **Otros**: Gorro, Guantes, Tapa Boca, Bolígrafo, Lanilla, Tirro, Botas
+
+    Then select the specific **Artículos** item from the filtered list.
+  </Step>
+  <Step title="Enter quantity and pricing (Entrada only)">
+    For **Entrada** movements, enter the **Monto Unitario** (unit price) and **Cantidad** (quantity). The **Total** is calculated automatically as `monto_unitario × cantidad`.
+  </Step>
+  <Step title="Save the movement">
+    Click **Guardar**. The system calls `POST /inventario/saveInventario` with the movement data. On success, the new movement is added to the list.
+  </Step>
+</Steps>
+
+## API reference
+
+| Method | Endpoint | Description |
+|---|---|---|
+| `GET` | `/inventario/getMovInventario` | Fetch all inventory movements |
+| `POST` | `/inventario/saveInventario` | Create a new inventory movement |
+| `GET` | `/regiones/getRegion` | Fetch available regions |
+| `GET` | `/usuarios/getDataUser` | Fetch users for responsible and beneficiary selection |
+| `GET` | `/clientes/getClients` | Fetch clients for account-to-charge selection |

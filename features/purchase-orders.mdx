@@ -1,0 +1,74 @@
+---
+title: "Purchase orders"
+description: "Generate and manage purchase orders in Mobility 4"
+---
+
+The **Purchase Orders** module (`Ordenes de Compra`) generates purchase order reports from field form data collected by promoters. You define a client, form, region, and date range, and the system queries the orders API to produce a downloadable CSV export.
+
+## Route
+
+| Route | Purpose |
+|---|---|
+| `/ordenesCompra` | Generate and download purchase order reports |
+
+## Generating a purchase order
+
+<Steps>
+  <Step title="Navigate to purchase orders">
+    Go to `/ordenesCompra`. The page loads the clients and regions assigned to your user account from `localStorage`.
+  </Step>
+  <Step title="Select a client">
+    Type in the **Cliente** field or choose from the autocomplete list. Selecting a client automatically loads the available forms for that client via `POST /formularios/getFormsWeb`.
+  </Step>
+  <Step title="Select a form">
+    Type in the **Formulario** field or choose from the autocomplete list. Only forms belonging to the selected client are shown.
+
+    <Note>
+      The **Formulario** field is required. Purchase orders are tied to a specific form template that defines the line items captured in the field.
+    </Note>
+  </Step>
+  <Step title="Select a region">
+    Type in the **Región** field or choose from the autocomplete list. The default value is `TODAS LAS REGIONES`, which includes data from all regions.
+  </Step>
+  <Step title="Set the date range">
+    Fill in the **Desde** and **Hasta** date fields. Both are required. The default range is the last 7 days.
+  </Step>
+  <Step title="Generate the orders">
+    Click **Generar órdenes de compra**. The system calls `POST /ordenes/generateOrden` with the form parameters. If the response contains data, a CSV file is downloaded to your browser named `Ordenes_Compra_{cliente}_{fechaInicio}_{fechaFinal}.csv`.
+  </Step>
+</Steps>
+
+<Warning>
+  If no order records are found for the selected date range, client, and form combination, no file is downloaded and a warning notification is shown. Verify that promoters have synced their data and that the date range is correct.
+</Warning>
+
+## Request data shape
+
+The purchase order generation endpoint accepts the following body:
+
+```json POST /ordenes/generateOrden
+{
+  "fechaInicio": "2024-01-01",
+  "fechaFinal": "2024-01-07",
+  "nombre_Cliente": "ACME CORP",
+  "region": "CARACAS",
+  "formulario": "Orden de Compra Semanal"
+}
+```
+
+| Field | Type | Required | Description |
+|---|---|---|---|
+| `fechaInicio` | `string` | Yes | Start date in `YYYY-MM-DD` format. |
+| `fechaFinal` | `string` | Yes | End date in `YYYY-MM-DD` format. |
+| `nombre_Cliente` | `string` | Yes | Exact client name as stored in the system. |
+| `region` | `string` | No | Region to filter by. Omit to include all regions. |
+| `formulario` | `string` | Yes | Name of the form template to query. |
+
+The response is an array of order objects. Each object in the response becomes one row in the exported CSV file, with all object keys used as column headers.
+
+## API reference
+
+| Method | Endpoint | Description |
+|---|---|---|
+| `POST` | `/ordenes/generateOrden` | Generate purchase orders for a client and form |
+| `POST` | `/formularios/getFormsWeb` | Fetch available forms for a client |

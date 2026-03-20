@@ -1,0 +1,97 @@
+---
+title: "Forms"
+description: "Build, deploy, and manage data collection forms for field operations"
+---
+
+The **Forms** module lets you browse, fill, and manage data collection forms used during field visits. Forms are linked to specific establishments and promoters, giving supervisors full visibility over what data has been collected, by whom, and when.
+
+## Routes
+
+| Route | Purpose |
+|---|---|
+| `/formularios` | List and browse available forms |
+| `/formManager` | Create a new form in the form builder |
+| `/apps/FormsEdit` | View and edit submitted form responses |
+| `/apps/FormView` | Fill out a form for a selected establishment |
+
+## Browsing forms
+
+Navigate to `/formularios` to see all forms available to your account. The page loads forms for each client in your user profile.
+
+<Steps>
+  <Step title="Select a client">
+    Use the **Cliente** dropdown to choose the client whose forms you want to view. The form list updates automatically when you select a client.
+  </Step>
+  <Step title="Select an establishment">
+    Use the **Establecimientos** dropdown to pick the establishment where you are conducting the visit. You must select an establishment before you can open a form.
+
+    <Warning>
+      If you try to open a form without selecting an establishment first, you will see a validation error. Select the establishment before proceeding.
+    </Warning>
+  </Step>
+  <Step title="Open the form">
+    Each form appears as a card showing the form name and version. Click **Ver** on the card to open the form for the selected establishment.
+
+    Forms with "asistencia" in the name route to `/apps/formAsistencia`. All other forms route to `/apps/FormView`.
+  </Step>
+</Steps>
+
+<Note>
+  Forms are fetched via `POST /formularios/getFormsWeb` with the selected client name. Forms named `sincronizacion` (case-insensitive) are automatically excluded from the list.
+</Note>
+
+## Creating a form
+
+Navigate to `/formManager` to open the embedded form builder. The builder is hosted at `https://manager.mobility-web.com` and is loaded inside an iframe authenticated with a one-time encrypted token derived from your user ID.
+
+<Steps>
+  <Step title="Navigate to the form builder">
+    Go to `/formManager`. The system calls the Manager API to generate an encrypted access token tied to your `uid`.
+  </Step>
+  <Step title="Build the form">
+    Use the embedded **Manager** interface to define questions, set question types (Simple, Multiple, Selection), configure options, and assign the form to a client.
+  </Step>
+  <Step title="Save and publish">
+    Save the form from within the Manager interface. Once saved, the form becomes available to field promoters on their mobile devices and appears in the `/formularios` list for the assigned client.
+  </Step>
+</Steps>
+
+## Editing submitted forms
+
+Navigate to `/apps/FormsEdit` to review and correct form responses that have already been synced from the field.
+
+<Steps>
+  <Step title="Apply filters">
+    Click the **Filtros** button to open the filter modal. You can filter by **Cliente**, **Region**, **Fecha Desde**, and **Fecha Hasta**. The page calls `POST /formularios/getSavedForms` with your filter criteria.
+  </Step>
+  <Step title="Review results">
+    The data grid shows each saved form with columns for **Formulario**, **Cliente**, **Establecimiento**, **Promotor**, **Fecha**, and **Versión**.
+  </Step>
+  <Step title="Edit a response">
+    Click the edit button (pencil icon) on a row to open the form response in `/apps/FormViewEdit`. Changes are saved via `POST /formularios/updateDataForm`.
+  </Step>
+  <Step title="Change the establishment">
+    Click the buildings icon on a row to open the **Cambiar Establecimiento** modal. This updates only the establishment linked to the form response without modifying the response data or timestamps. The API call is `POST /formularios/updateEstablishmentForm`.
+  </Step>
+</Steps>
+
+<Tip>
+  The page preserves your last-used filters and result set in `localStorage` under the keys `FormsEditFilters` and `FormsEditData`. When you return from editing a form, your previous search is restored automatically.
+</Tip>
+
+## Uploading a backup
+
+On the `/formularios` page, click **Subir Respaldo** to open the backup upload modal. This allows you to upload a JSON backup file containing form responses that were collected offline and need to be re-synced.
+
+## API reference
+
+| Method | Endpoint | Description |
+|---|---|---|
+| `POST` | `/formularios/getFormsWeb` | Fetch forms for a client |
+| `POST` | `/formularios/addForms` | Create a new form |
+| `POST` | `/formularios/updateDataForm` | Update an existing form response |
+| `POST` | `/formularios/updateEstablishmentForm` | Update the establishment linked to a form |
+| `POST` | `/formularios/updateForm` | Update form photo attachments |
+| `POST` | `/formularios/getSavedForms` | Retrieve saved (synced) form responses |
+| `POST` | `/formularios/foundAndUpdateForms` | Find and update a form by criteria |
+| `POST` | `/formularios/deleteForms` | Delete one or more form responses |

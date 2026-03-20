@@ -1,0 +1,263 @@
+---
+title: "Establishments"
+description: "Manage establishment (store) records: list, create, retrieve by ID, and update client time-in-store targets."
+---
+
+The establishments API manages the physical store locations visited by field operators. Functions in `Establishment.js` use several namespaces: `EstablecimientosNuevos/` for establishment CRUD, `clientes/` for client lookups, `usuarios/` for user lookups, `formularios/` for form lookups, `regiones/` for region lookups, and `analytics/` for time-in-store configuration.
+
+<Note>
+  All requests require a valid Bearer token. See [Authentication](/api/authentication) for setup instructions.
+</Note>
+
+---
+
+## getClients
+
+Fetch all clients. Used in the establishment management UI to populate client filter dropdowns.
+
+**Method:** `GET`  
+**Path:** `/clientes/getClients`
+
+### Request
+
+No parameters required.
+
+### Response
+
+Returns the full Axios `response` object. Access records via `response.data`.
+
+### Example
+
+<CodeGroup>
+
+```javascript getClients
+import { getClients } from "@/Api/Establishment";
+
+const response = await getClients();
+console.log(response.data);
+```
+
+</CodeGroup>
+
+---
+
+## getUsers
+
+Fetch all user records.
+
+**Method:** `GET`  
+**Path:** `/usuarios/getDataUser`
+
+### Request
+
+No parameters required.
+
+### Response
+
+Returns the full Axios `response` object. Access records via `response.data`.
+
+### Example
+
+<CodeGroup>
+
+```javascript getUsers
+import { getUsers } from "@/Api/Establishment";
+
+const response = await getUsers();
+console.log(response.data);
+```
+
+</CodeGroup>
+
+---
+
+## getForms
+
+Fetch all forms associated with a specific client.
+
+**Method:** `POST`  
+**Path:** `/formularios/getFormsWeb`
+
+### Request
+
+<ParamField body="cliente" type="string" required>
+  The client identifier used to filter forms.
+</ParamField>
+
+### Response
+
+Returns the full Axios `response` object. Access records via `response.data`.
+
+### Example
+
+<CodeGroup>
+
+```javascript getForms
+import { getForms } from "@/Api/Establishment";
+
+const response = await getForms("client-xyz");
+console.log(response.data);
+```
+
+</CodeGroup>
+
+---
+
+## getRegion
+
+Fetch all regions.
+
+**Method:** `GET`  
+**Path:** `/regiones/getRegion`
+
+### Request
+
+No parameters required.
+
+### Response
+
+Returns `response.data` — an array of region objects.
+
+### Example
+
+<CodeGroup>
+
+```javascript getRegion
+import { getRegion } from "@/Api/Establishment";
+
+const regions = await getRegion();
+console.log(regions);
+```
+
+</CodeGroup>
+
+---
+
+## saveNewEstablishment
+
+Create a new establishment record.
+
+**Method:** `POST`  
+**Path:** `/EstablecimientosNuevos/saveNewEstablishment`
+
+### Request
+
+<ParamField body="dataFinal" type="object" required>
+  The complete establishment object to persist. The exact schema is defined by your establishment model.
+</ParamField>
+
+### Response
+
+Returns the full Axios `response` object.
+
+### Example
+
+<CodeGroup>
+
+```javascript saveNewEstablishment
+import { saveNewEstablishment } from "@/Api/Establishment";
+
+const response = await saveNewEstablishment({
+  name: "Supermarket Central",
+  address: "123 Main St",
+  region: "North Zone",
+  client: "client-xyz",
+});
+```
+
+</CodeGroup>
+
+---
+
+## getAllEstablishment
+
+Fetch all establishment records.
+
+**Method:** `GET`  
+**Path:** `/EstablecimientosNuevos/getAllEstablishment`
+
+### Request
+
+No parameters required.
+
+### Response
+
+Returns the full Axios `response` object. Access the establishment list via `response.data`.
+
+### Example
+
+<CodeGroup>
+
+```javascript getAllEstablishment
+import { getAllEstablishment } from "@/Api/Establishment";
+
+const response = await getAllEstablishment();
+console.log(response.data);
+```
+
+</CodeGroup>
+
+---
+
+## getEstablishmentData
+
+Fetch detailed data for a specific establishment by ID.
+
+**Method:** `POST`  
+**Path:** `/EstablecimientosNuevos/getEstablishmentData`
+
+### Request
+
+<ParamField body="id" type="string" required>
+  The unique identifier of the establishment to retrieve.
+</ParamField>
+
+### Response
+
+Returns the full Axios `response` object. Access the establishment record via `response.data`.
+
+### Example
+
+<CodeGroup>
+
+```javascript getEstablishmentData
+import { getEstablishmentData } from "@/Api/Establishment";
+
+const response = await getEstablishmentData("store-001");
+console.log(response.data);
+```
+
+</CodeGroup>
+
+---
+
+## updateTimeInStore
+
+Update the target time-in-store for one or more client-establishment combinations. This targets the analytics extras endpoint.
+
+**Method:** `POST`  
+**Path:** `/analytics/extras/updateTimeInStore`
+
+### Request
+
+<ParamField body="data" type="object" required>
+  An object describing the time-in-store update. The exact shape depends on your analytics schema — typically an array of `{ client, establishment, targetMinutes }` entries.
+</ParamField>
+
+### Response
+
+Returns the full Axios `response` object.
+
+### Example
+
+<CodeGroup>
+
+```javascript updateTimeInStore
+import { updateTimeInStore } from "@/Api/Establishment";
+
+const response = await updateTimeInStore([
+  { client: "client-xyz", establishment: "store-001", targetMinutes: 30 },
+]);
+```
+
+</CodeGroup>

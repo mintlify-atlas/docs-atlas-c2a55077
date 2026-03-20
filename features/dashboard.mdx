@@ -1,0 +1,89 @@
+---
+title: "Dashboard"
+description: "Overview of the Mobility 4 main dashboard and key performance indicators."
+---
+
+The Mobility 4 dashboard is the central view you land on after signing in. It gives you an at-a-glance summary of field operations through KPI cards and data visualizations sourced from the platform's indicators API.
+
+**Routes:** `/` and `/dashboard/ecommerce`
+
+## Indicators API
+
+All metrics displayed on the dashboard are fetched from:
+
+```http
+GET /mobility-4/dashboard/indicators
+```
+
+You can also retrieve a single indicator by ID:
+
+```http
+GET /mobility-4/dashboard/indicators/{id}
+```
+
+Both endpoints require a Bearer token in the `Authorization` header.
+
+```javascript
+const headers = {
+  Authorization: `Bearer ${token}`,
+  "Content-Type": "application/json",
+};
+```
+
+## Dashboard view
+
+The main dashboard (`/dashboard/ecommerce`) renders the **Mobility 4 operations overview**. It displays the `DashMob` image that serves as a visual summary of the current operational state — acting as a high-level snapshot before you drill into individual modules.
+
+<Note>
+  The ecommerce dashboard path is also aliased to `/`, so navigating to the root of the application loads this view by default.
+</Note>
+
+## KPI metrics
+
+The dashboard surfaces the following categories of indicators, each rendered as a KPI card or chart:
+
+<CardGroup cols={2}>
+  <Card title="Field activity" icon="map-location-dot">
+    Tracks promoter visits, check-ins, and route completion rates across active regions and clients.
+  </Card>
+  <Card title="User status" icon="users">
+    Shows the total number of active and inactive users registered in the platform, broken down by role.
+  </Card>
+  <Card title="Establishment coverage" icon="store">
+    Displays how many establishments have been visited versus planned for the current period.
+  </Card>
+  <Card title="Inventory movement" icon="boxes-stacked">
+    Summarizes product inventory transfers, stock levels, and movement history across the field.
+  </Card>
+  <Card title="Form submissions" icon="clipboard-list">
+    Reports the number of forms and surveys submitted by field workers within a given timeframe.
+  </Card>
+  <Card title="Purchase orders" icon="file-invoice">
+    Shows the count and status of purchase orders generated through the platform.
+  </Card>
+</CardGroup>
+
+## Data visualizations
+
+Beyond the KPI cards, the dashboard includes the following chart types:
+
+- **Bar charts** — compare visit volumes by region or client over time
+- **Line charts** — track operational trends across daily, weekly, or monthly periods
+- **Pie / radial charts** — break down user roles, establishment types, or form completion by category
+- **Heatmaps** — visualize field activity density by geographic region
+
+<Tip>
+  Use the date range filter at the top of the dashboard to scope all charts and KPI cards to a specific operational period.
+</Tip>
+
+## Navigation
+
+From the dashboard you can navigate directly to any operational module using the sidebar. The main platform routes are defined in `AuthRoutes.jsx` under `DashboardRoutes`:
+
+| Route | Description |
+|---|---|
+| `/` | Main dashboard (ecommerce view) |
+| `/dashboard/ecommerce` | Explicit ecommerce dashboard path |
+| `/dashboard/project` | Project dashboard view |
+| `/dashboard/crypto` | Crypto dashboard view |
+| `/dashboard/education` | Education dashboard view |
