@@ -1,9 +1,9 @@
 ---
 title: "Users"
-description: "Look up users, fetch establishment assignments, and manage assignment operations for field operators."
+description: "Create, update, delete, and look up users; manage establishment assignments and permissions for field operators."
 ---
 
-The users API covers client lookups, region lookups, and all establishment-assignment operations for individual users. Functions in `user.js` target the `clientes/`, `regiones/`, `usuarios/`, and `analytics/` namespaces.
+The users API spans two source modules: `ListUser.js` handles user CRUD and lookup operations, while `user.js` covers establishment-assignment operations. Both target the `usuarios/` namespace (with additional calls to `clientes/`, `regiones/`, and `analytics/`).
 
 <Note>
   All requests require a valid Bearer token. See [Authentication](/api/authentication) for setup instructions.
@@ -279,6 +279,345 @@ const response = await DeleteMultipleAsignacionEstablecimientos(
   "user-uid-123",
   ["doc-id-1", "doc-id-2", "doc-id-3"]
 );
+```
+
+</CodeGroup>
+
+---
+
+## User CRUD operations
+
+The following functions are exported from `src/Api/ListUser.js` and handle core user management.
+
+---
+
+## GetUser
+
+Fetch all users (no authentication headers).
+
+**Method:** `GET`  
+**Path:** `/usuarios/getUser`
+
+### Request
+
+No parameters required.
+
+### Example
+
+<CodeGroup>
+
+```javascript GetUser
+import { GetUser } from "@/Api/ListUser";
+
+const response = await GetUser();
+console.log(response.data);
+```
+
+</CodeGroup>
+
+---
+
+## getDataUser
+
+Fetch all users with full profile data (no authentication headers).
+
+**Method:** `GET`  
+**Path:** `/usuarios/getDataUser`
+
+### Request
+
+No parameters required.
+
+### Example
+
+<CodeGroup>
+
+```javascript getDataUser
+import { getDataUser } from "@/Api/ListUser";
+
+const response = await getDataUser();
+console.log(response.data);
+```
+
+</CodeGroup>
+
+---
+
+## getDataUserPermission
+
+Fetch all users with their permission data. Requires Bearer token.
+
+**Method:** `GET`  
+**Path:** `/usuarios/getDataUserPermission`
+
+### Request
+
+No parameters required.
+
+### Example
+
+<CodeGroup>
+
+```javascript getDataUserPermission
+import { getDataUserPermission } from "@/Api/ListUser";
+
+const response = await getDataUserPermission();
+console.log(response.data);
+```
+
+</CodeGroup>
+
+---
+
+## createUpdateUser
+
+Create a new user or update an existing one. Requires Bearer token.
+
+**Method:** `POST`  
+**Path:** `/usuarios/createUpdateUser`
+
+### Request
+
+<ParamField body="data" type="object" required>
+  Full user object. Include the user's `uid` to update an existing record; omit it to create a new user.
+</ParamField>
+
+### Example
+
+<CodeGroup>
+
+```javascript createUpdateUser
+import { createUpdateUser } from "@/Api/ListUser";
+
+const response = await createUpdateUser({
+  nombre: "Ana",
+  apellido: "García",
+  cedula: "12345678",
+  email: "ana.garcia@example.com",
+  cliente: ["ClienteA"],
+  region: ["Norte"],
+});
+```
+
+</CodeGroup>
+
+---
+
+## createUserFromPreRegister
+
+Activate a pre-registered user into a full account.
+
+**Method:** `POST`  
+**Path:** `/usuarios/createUserFromPreRegister`
+
+### Request
+
+<ParamField body="data" type="object" required>
+  Pre-registration payload including client, region, profile, and establishment assignments.
+</ParamField>
+
+### Example
+
+<CodeGroup>
+
+```javascript createUserFromPreRegister
+import { createUserFromPreRegister } from "@/Api/ListUser";
+
+const response = await createUserFromPreRegister(preRegisterPayload);
+```
+
+</CodeGroup>
+
+---
+
+## updateUserDeleted
+
+Soft-delete a user by marking them as deleted.
+
+**Method:** `POST`  
+**Path:** `/usuarios/updateUserDeleted`
+
+### Request
+
+<ParamField body="data" type="object" required>
+  User object or identifier to mark as deleted.
+</ParamField>
+
+### Example
+
+<CodeGroup>
+
+```javascript updateUserDeleted
+import { updateUserDeleted } from "@/Api/ListUser";
+
+const response = await updateUserDeleted({ uid: "user-uid-123" });
+```
+
+</CodeGroup>
+
+---
+
+## deleteUser
+
+Permanently delete a user by UID.
+
+**Method:** `PUT`  
+**Path:** `/usuarios/deleteUser`
+
+### Request
+
+<ParamField body="uid" type="string" required>
+  Firebase UID of the user to delete.
+</ParamField>
+
+### Example
+
+<CodeGroup>
+
+```javascript deleteUser
+import { deleteUser } from "@/Api/ListUser";
+
+const response = await deleteUser("user-uid-123");
+```
+
+</CodeGroup>
+
+---
+
+## getaByCedula
+
+Look up a user by their national ID (cédula).
+
+**Method:** `POST`  
+**Path:** `/usuarios/getaByCedula`
+
+### Request
+
+<ParamField body="cedula" type="string" required>
+  The user's national ID number.
+</ParamField>
+
+### Example
+
+<CodeGroup>
+
+```javascript getaByCedula
+import { getaByCedula } from "@/Api/ListUser";
+
+const response = await getaByCedula("12345678");
+console.log(response.data);
+```
+
+</CodeGroup>
+
+---
+
+## getaByKey
+
+Look up a user by a custom key. Requires Bearer token.
+
+**Method:** `POST`  
+**Path:** `/usuarios/getaBykey`
+
+### Request
+
+<ParamField body="key" type="string" required>
+  The lookup key for the user record.
+</ParamField>
+
+### Example
+
+<CodeGroup>
+
+```javascript getaByKey
+import { getaByKey } from "@/Api/ListUser";
+
+const response = await getaByKey("some-key-value");
+```
+
+</CodeGroup>
+
+---
+
+## getaByEmail
+
+Look up a user by email address.
+
+**Method:** `POST`  
+**Path:** `/usuarios/getaByEmail`
+
+### Request
+
+<ParamField body="email" type="string" required>
+  The user's email address.
+</ParamField>
+
+### Example
+
+<CodeGroup>
+
+```javascript getaByEmail
+import { getaByEmail } from "@/Api/ListUser";
+
+const response = await getaByEmail("ana.garcia@example.com");
+```
+
+</CodeGroup>
+
+---
+
+## Get_user_with_permissions
+
+Fetch the permissions object for a user by email.
+
+**Method:** `POST`  
+**Path:** `/analytics/extras/getUserPermissions`
+
+### Request
+
+<ParamField body="userEmail" type="string" required>
+  The email address of the user whose permissions to retrieve.
+</ParamField>
+
+### Example
+
+<CodeGroup>
+
+```javascript Get_user_with_permissions
+import { Get_user_with_permissions } from "@/Api/ListUser";
+
+const response = await Get_user_with_permissions("ana.garcia@example.com");
+console.log(response.data);
+```
+
+</CodeGroup>
+
+---
+
+## Update_user_with_permissions
+
+Update the permissions object for a user.
+
+**Method:** `POST`  
+**Path:** `/analytics/extras/updateUserPermissions`
+
+### Request
+
+<ParamField body="info" type="object" required>
+  Permissions payload including the user email and updated permission flags.
+</ParamField>
+
+### Example
+
+<CodeGroup>
+
+```javascript Update_user_with_permissions
+import { Update_user_with_permissions } from "@/Api/ListUser";
+
+const response = await Update_user_with_permissions({
+  userEmail: "ana.garcia@example.com",
+  permisos: { dashboard: true, inventario: false },
+});
 ```
 
 </CodeGroup>
