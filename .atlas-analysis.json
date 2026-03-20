@@ -1,0 +1,110 @@
+{
+  "projectType": "saas",
+  "projectName": "Mobility 4",
+  "projectDescription": "A React-based field operations management platform for tracking promoters, managing routes and establishments, handling inventory, and generating reports.",
+  "theme": "maple",
+  "primaryColor": "#C1440E",
+  "lightColor": "#F5E6E0",
+  "darkColor": "#8B2F0A",
+  "navigation": {
+    "tabs": [
+      {
+        "tab": "Overview",
+        "groups": [
+          {
+            "group": "Get Started",
+            "pages": ["introduction", "quickstart", "authentication"]
+          },
+          {
+            "group": "Core Concepts",
+            "pages": ["concepts/architecture", "concepts/roles-permissions", "concepts/regions-clients"]
+          }
+        ]
+      },
+      {
+        "tab": "Features",
+        "groups": [
+          {
+            "group": "Dashboard",
+            "pages": ["features/dashboard"]
+          },
+          {
+            "group": "User Management",
+            "pages": ["features/users", "features/roles", "features/access-control"]
+          },
+          {
+            "group": "Field Operations",
+            "pages": ["features/routes", "features/establishments", "features/activation", "features/tracking"]
+          },
+          {
+            "group": "Forms & Surveys",
+            "pages": ["features/forms", "features/surveys", "features/photographic-register"]
+          },
+          {
+            "group": "Inventory & Orders",
+            "pages": ["features/inventory", "features/purchase-orders", "features/dotacion"]
+          },
+          {
+            "group": "Reports",
+            "pages": ["features/reports", "features/download-reports", "features/permissions-analytics"]
+          },
+          {
+            "group": "Configuration",
+            "pages": ["features/sku-configuration", "features/template-routes", "features/calendar"]
+          }
+        ]
+      },
+      {
+        "tab": "API Reference",
+        "groups": [
+          {
+            "group": "Overview",
+            "pages": ["api/overview", "api/authentication"]
+          },
+          {
+            "group": "Endpoints",
+            "pages": ["api/dashboard", "api/users", "api/roles", "api/clients", "api/regions", "api/establishments", "api/routes", "api/inventory", "api/orders", "api/forms", "api/tracking"]
+          }
+        ]
+      }
+    ]
+  },
+  "keyFeatures": [
+    "Field promoter and supervisor tracking with real-time map visualization",
+    "Route and establishment management with assignment workflows",
+    "Role-based access control with granular permissions",
+    "Dynamic form builder and survey management",
+    "Inventory tracking with transfer and movement history",
+    "Purchase order generation and management",
+    "Photographic register for field documentation",
+    "Multi-client and multi-region support",
+    "SKU configuration for product catalogs",
+    "Downloadable reports with analytics dashboard",
+    "Firebase-backed authentication",
+    "Template-based route planning"
+  ],
+  "publicApiSurface": [
+    "GET /mobility-4/dashboard/indicators",
+    "GET /mobility-4/dashboard/indicators/:id",
+    "GET /clientes/getClients",
+    "GET /regiones/getRegion",
+    "GET /roles/getRoles",
+    "POST /roles/createUpdateRoles",
+    "PUT /roles/deleteAcces",
+    "POST /usuarios/getEstablecimientoNewCollection",
+    "POST /usuarios/getStoreNewFormat",
+    "POST /usuarios/DeleteAsignacionEstablecimientos",
+    "POST /usuarios/AsignarNewCollectionEstablecimientos",
+    "POST /usuarios/getUserClientAndRegion",
+    "GET /EstablecimientosNuevos/getAllEstablishment",
+    "POST /usuarios/getaUserNewFormat",
+    "GET /inventario/getInventario",
+    "POST /inventario/transferInventario",
+    "GET /inventario/getMovInventario",
+    "POST /inventario/saveInventario",
+    "POST /ordenes/generateOrden",
+    "POST /ordenes/generateEncuesta",
+    "POST /coordenadas/getCoordenadasWithDay",
+    "POST /analytics/callProcedure"
+  ]
+}
